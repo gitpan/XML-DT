@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 use XML::DT ;
-use Test::More tests => 5;
+use Test::More tests => 7;
 my $filename = "t/05_input.xml";
 
 ####
@@ -47,3 +47,12 @@ is($str, "zbrzbr");
 
 $str = dtstring("<foo></foo>", -declr => 1);
 is("<?xml version=\"1.0\"?>\n<foo></foo>",$str);
+
+###
+
+$str = dtstring("<encoding>áéíóú</encoding>", -inputenc=>'ISO-8859-1');
+is("<encoding>áéíóú</encoding>",$str);
+###
+$str = dtstring("<encoding>çÇãÃ</encoding>", -outputenc=>'ISO-8859-1'
+                                            ,-inputenc=>'ISO-8859-1');
+is("<encoding>çÇãÃ</encoding>",$str);

@@ -17,7 +17,7 @@ if (my $m = $INC{"bytes.pm"}) {require bytes; import bytes;}
 @EXPORT=qw(&dt &dtstring &dturl &inctxt &ctxt &mkdtskel &mkdtdskel &toxml 
  &MMAPON $c %v $q &xmltree &pathdturl
  @dtcontext %dtcontextcount @dtatributes &pathdt &pathdtstring );
-$VERSION = '0.28';
+$VERSION = '0.29';
 #XML::LIBXML# $PARSER = 'XML::LibXML';
 #XML::PARSER# $PARSER = 'XML::Parser';
 }
@@ -743,8 +743,11 @@ while(@l) {
 #XML::LIBXML#      $val = $tree->getData();
 
 $name = "-pcdata";
-$aux= (defined($xml->{-outputenc}) && $xml->{-outputenc} eq 'ISO-8859-1')
-?lat1::utf8($val): $val ;
+#XML::PARSER# $aux= (defined($xml->{-outputenc}) && $xml->{-outputenc} eq 'ISO-8859-1')
+#XML::PARSER#  ?lat1::utf8($val): $val ;
+
+#XML::LIBXML# $aux= (defined($xml->{-outputenc}))
+#XML::LIBXML#  ?decodeFromUTF8($xml->{-outputenc},$val): $val ;
 if (defined($xml->{-pcdata})) {
 push(@dtcontext,"-pcdata");
 $c = $aux;
