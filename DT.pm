@@ -17,7 +17,7 @@ BEGIN{
  @EXPORT=qw(&dt &dtstring &dturl &inctxt &ctxt &mkdtskel &mkdtdskel &toxml 
          &MMAPON $c %v $q &xmltree &pathdturl
          @dtcontext %dtcontextcount @dtatributes &pathdt &pathdtstring );
- $VERSION = '0.24.1';
+ $VERSION = '0.25';
 }
 
 =head1 NAME
@@ -856,11 +856,18 @@ sub toxml1 {
 
 sub mkdtskel{
   my @files = @_;
-  my %mkdtskel = (
-		  '-default' => sub{$element{$q}++; 
-				    for (keys %v){$att{$q}{$_}=1 }; ""},
+  my %mkdtskel =
+    (
 
-		  '-end' => sub{ print <<'END';
+     '-default' => sub{
+       $element{$q}++;
+       for (keys %v) {
+	 $att{$q}{$_} = 1
+       };
+       ""},
+
+     '-end' => sub{
+       print <<'END';
 #!/usr/bin/perl
 use XML::DT ;
 my $filename = shift;
@@ -869,14 +876,14 @@ my $filename = shift;
 #    '-outputenc' => 'ISO-8859-1',
 #    '-default'   => sub{"<$q>$c</$q>"},
 END
-				 for $name (keys %element) {
-				   print "     '$name' => sub{\"\$q:\$c\"},";
-				   print '# remember $v{', join('},$v{',keys %{$att{$name}}), '}'
-				     if $att{$name};
-				   print "# $element{$name}";
-				   print "\n";
-				 }
-				 print <<'END';
+       for $name (sort keys %element) {
+	 print "     '$name' => sub{\n";
+	 print '       # remember attributes $v{', join('},$v{',keys %{$att{$name}}), "}\n";
+	 print "       # occurred $element{$name} times\n" if $att{$name};
+	 print "       \"\$q:\$c\"\n";
+	 print "     },\n";
+       }
+       print <<'END';
 );
 print dt($filename,%handler);
 END

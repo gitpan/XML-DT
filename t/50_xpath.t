@@ -32,7 +32,7 @@ is (pathdtstring($xml, ("a|b|c" => sub{toxml} ))."\n", $xml);
 
 ### XPath over attributes
 
-my $xml = <<"EOX";
+$xml = <<"EOX";
 <a v="1"><b>2</b><c><b>3</b></c><a v="2">4</a></a>
 EOX
 

@@ -1,9 +1,13 @@
 Revision history for Perl extension XML::DT.
 
-0.25  ??
-	- ...
+0.25  Oct 08, 2003
+	- Thanks to Martin Mokrejs, detected too many bugs with perl 5.8.1,
+and now it is REQUIRED!
 
-0.24  Fev .., 2003
+0.24.1 Jun 17, 2003
+	- corrected problem when using a prefix on Makefile.PL 
+
+0.24  Fev 20, 2003
 	- added documentation to mkdtskel and mkdtdskel;
 	- ispell'ed README, Changes and DT.pm(pod) files;
 	- added ExtUtils::MakeMaker version request;

@@ -18,8 +18,8 @@ is(toxml("a",{},"c"), "<a>c</a>");
 is(toxml("a",{a=>1},"c"), "<a a=\"1\">c</a>");
 
 # toxml with variables
-$q = a;
-$c = b;
+$q = "a";
+$c = "b";
 %v = ();
 is(toxml, "<a>b</a>");
 

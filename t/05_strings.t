@@ -28,7 +28,9 @@ is($str, "a:b:c:aeiouc:aeioub:c:aeiouc:aeioub:c:aeiouc:aeiou");
 ####
 
 %h4=(c => sub{ $v{title} },
-     '-default'   => sub{ "$v{title}$c" });
+     '-default'   => sub{ 
+	$v{title} ||="";
+        "$v{title}$c" });
 $str = dt($filename,%h4);
 $str =~ s/\s//g;
 is($str, "zbrzbr");
