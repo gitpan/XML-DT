@@ -5,11 +5,11 @@ use XML::DT;
 ok(1);
 
 # normalize_space
-is(XML::DT::normalize_space("  teste  "), "teste");
-is(XML::DT::normalize_space("\tteste\t"), "teste");
-is(XML::DT::normalize_space("\tteste  "), "teste");
+is(XML::DT::_normalize_space("  teste  "), "teste");
+is(XML::DT::_normalize_space("\tteste\t"), "teste");
+is(XML::DT::_normalize_space("\tteste  "), "teste");
 
-is(XML::DT::normalize_space(" spaces   in   \t the middle\t"),
+is(XML::DT::_normalize_space(" spaces   in   \t the middle\t"),
    "spaces in the middle");
 
 # toxml as function

@@ -1,13 +1,15 @@
 # http://module-build.sourceforge.net/META-spec.html
 #XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
 name:         XML-DT
-version:      0.31
+version:      0.32
 version_from: DT.pm
 installdirs:  site
 requires:
     ExtUtils::MakeMaker:           6.17
     LWP::Simple:                   1.35
     Test::More:                    0.40
+    Test::Pod:                     1.00
+    Test::Pod::Coverage:           0.08
     XML::LibXML:                   1.54
 
 distribution_type: module

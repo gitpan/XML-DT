@@ -15,6 +15,10 @@ $xmllibxml_version = 1.54;
 		'ExtUtils::MakeMaker' => '6.17',
 		'Test::More' => '0.40',
 		'LWP::Simple' => '1.35',
+		# we can remove these two from here, given the tests
+		# can cope with their inexistence.
+		'Test::Pod::Coverage' => '0.08',
+		'Test::Pod' => '1.00',
 	       );
 
 if ($PARSER) {
@@ -71,7 +75,7 @@ WriteMakefile(
 
 sub set_libxml_func {
   set_func(<<'EOPERL');
-sub fromUTF8 {
+sub _fromUTF8 {
   my $string = shift;
   my $encode = shift;
   XML::LibXML::decodeFromUTF8($encode, $string);
@@ -81,7 +85,7 @@ EOPERL
 
 sub set_old_compat_func {
   set_func(<<'EOPERL');
-sub fromUTF8 {
+sub _fromUTF8 {
   my $string = shift;
   my $encode = shift; #ignoring
   {
@@ -95,7 +99,7 @@ EOPERL
 
 sub set_encode_func {
   set_func(<<'EOPERL');
-sub fromUTF8 {
+sub _fromUTF8 {
   use Encode;
   my $string = shift;
   my $encode = shift;

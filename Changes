@@ -1,5 +1,9 @@
 Revision history for Perl extension XML::DT.
 
+0.32  Sep 20, 2004
+	- Added missing documentation;
+	- Added pod and pod-coverage tests;
+
 0.31  Aug 09, 2004
         - Added documentation to @dtattributes
 

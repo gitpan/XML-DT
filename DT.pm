@@ -21,7 +21,7 @@ BEGIN {
 	     &MMAPON $c %v $q &xmltree &pathdturl
 	     @dtcontext %dtcontextcount @dtatributes &pathdt &pathdtstring );
 
-  $VERSION = '0.31';
+  $VERSION = '0.32';
   #XML::LIBXML# $PARSER = 'XML::LibXML';
   #XML::PARSER# $PARSER = 'XML::Parser';
 
@@ -63,23 +63,26 @@ the hash:
              ...
            );
 
-=head2 C<dt> function
+
+=head1 Functions
+
+=head2 dt
 
 Down translation function C<dt> receives a filename and a set of
 expressions (functions) defining the processing and associated values
 for each element.
 
-=head2 C<dtstring> function
+=head2 dtstring
 
 C<dtstring> works in a similar way with C<dt> but takes input from a
 string instead of a file.
 
-=head2 C<dturl> function
+=head2 dturl
 
 C<dturl> works in a similar way with C<dt> but takes input from an
 Internet url instead of a file.
 
-=head2 C<pathdt> function
+=head2 pathdt
 
 The C<pathdt> function is a C<dt> function which can handle a subset
 of XPath on handler keys. Example:
@@ -119,21 +122,27 @@ the down translation model. For more documentation about XPath check
 the specification at http://www.w3c.org or some tutorials under
 http://www.zvon.org
 
-=head2 C<pathdtstring> function
+=head2 pathdtstring
 
 Like the C<dtstring> function but supporting XPath.
 
-=head2 C<pathdturl> function
+=head2 pathdturl
 
 Like the C<dturl> function but supporting XPath.
 
-=head2 C<inctxt> function
+=head2 inctxt
 
 C<inctxt(pattern)> is true if the actual element path matches the
 provided pattern. This function is meant to be used in the element
 functions in order to achieve context dependent processing.
 
-=head2 C<toxml> function
+=head2 ctxt
+
+Returns the context element of the currently being processed
+element. So, if you call C<ctxt(1)> you will get your father element,
+and so on.
+
+=head2 toxml
 
 This is the default "-default" function. It can be used to generate
 XML based on C<$c> C<$q> and C<%v> variables. Example: add a new
@@ -151,13 +160,23 @@ returns:
 
  <a href='http://local/f.html'>example</a>
 
-=head2 C<xmltree> function
+=head2 xmltree
 
 This simple function just makes a HASH reference:
 
  { -c => $c, -q => $q, all_the_other_attributes }
 
 The function C<toxml> understands this structure and makes XML with it.
+
+=head2 mkdtskel
+
+Used by the mkdtskel script to generate automatically a XML::DT perl
+script file based on an XML file. Check C<mkdtskel> for details.
+
+=head2 mkdtdskel
+
+Used by the mkdtskel script to generate automatically a XML::DT perl
+script file based on a DTD file. Check C<mkdtdskel> for details.
 
 =head1 Accessing parents
 
@@ -351,7 +370,7 @@ To do this use the function C<mkdtskel(filename)>.
 Example:
 
  perl -MXML::DT -e 'mkdtskel "f.xml"' > f.pl
- 
+
 =head1 DTD skeleton generation
 
 It makes a naive DTD based on an example(s).
@@ -444,12 +463,12 @@ sub dt {
   my $return = "";
   # execute End action if it exists
   if($xml{-end}) {
-    #XML::LIBXML#    $c = omni("-ROOT", \%xml, $tree);
-    #XML::PARSER#    $c = omni("-ROOT", \%xml, @$tree);
+    #XML::LIBXML#    $c = _omni("-ROOT", \%xml, $tree);
+    #XML::PARSER#    $c = _omni("-ROOT", \%xml, @$tree);
     $return = &{$xml{-end}}
   } else {
-    #XML::LIBXML#    $return = omni("-ROOT",\%xml, $tree)
-    #XML::PARSER#    $return = omni("-ROOT",\%xml, @$tree)
+    #XML::LIBXML#    $return = _omni("-ROOT",\%xml, $tree)
+    #XML::PARSER#    $return = _omni("-ROOT",\%xml, @$tree)
   }
 
   if ($declr) {
@@ -479,7 +498,7 @@ sub inctxt {
 
 sub pathdtstring{
   my $string = shift;
-  my %h = pathtodt(@_);
+  my %h = _pathtodt(@_);
   return dtstring($string,%h);
 }
 
@@ -487,7 +506,7 @@ sub pathdtstring{
 
 sub pathdturl{
   my $url = shift;
-  my %h = pathtodt(@_);
+  my %h = _pathtodt(@_);
   return dturl($url,%h);
 }
 
@@ -561,12 +580,12 @@ sub dtstring {
 
   # Check if we have an end function
   if ($xml{-end}) {
-    #XML::LIBXML#    $c = omni("-ROOT", \%xml, $tree);
-    #XML::PARSER#    $c = omni("-ROOT", \%xml, @$tree);
+    #XML::LIBXML#    $c = _omni("-ROOT", \%xml, $tree);
+    #XML::PARSER#    $c = _omni("-ROOT", \%xml, @$tree);
     $return = &{$xml{-end}}
   } else {
-    #XML::LIBXML#    $return = omni("-ROOT", \%xml, $tree)
-    #XML::PARSER#    $return = omni("-ROOT", \%xml, @$tree)
+    #XML::LIBXML#    $return = _omni("-ROOT", \%xml, $tree)
+    #XML::PARSER#    $return = _omni("-ROOT", \%xml, @$tree)
   }
 
   if ($declr) {
@@ -580,14 +599,14 @@ sub dtstring {
 
 sub pathdt{
   my $file = shift;
-  my %h = pathtodt(@_);
+  my %h = _pathtodt(@_);
   return dt($file,%h);
 }
 
 
 
 # Parsing dos predicados do XPath
-sub testAttr {
+sub _testAttr {
   my $atr = shift;
   for ($atr) {
     s/name\(\)/'$q'/g;
@@ -595,23 +614,23 @@ sub testAttr {
     s/\@([A-Za-z_]+)/defined $v{$1}?"'$v{$1}'":"''"/ge;
     s/\@\*/keys %v?"'1'":"''"/ge;
     if (/^not\((.*)\)$/) {
-      return ! testAttr($1);
+      return ! _testAttr($1);
     } elsif (/^('|")([^\1]*)(\1)\s*=\s*('|")([^\4]*)\4$/) {
       return ($2 eq $5);
     } elsif (/normalize-space\((['"])([^\1)]*)\1\)/) {
       my ($back,$forward)=($`,$');
-      my $x = normalize_space($2);
-      return testAttr("$back'$x'$forward"); 
+      my $x = _normalize_space($2);
+      return _testAttr("$back'$x'$forward"); 
     } elsif (/starts-with\((['"])([^\1))]*)\1,(['"])([^\3))]*)\3\)/) {
-      my $x = starts_with($2,$4);
+      my $x = _starts_with($2,$4);
       return $x;
     } elsif (/contains\((['"])([^\1))]*)\1,(['"])([^\3))]*)\3\)/) {
-      my $x = contains($2,$4);
+      my $x = _contains($2,$4);
       return $x; 
     } elsif (/string-length\((['"])([^\1]*)\1\)/) {
       my ($back,$forward) = ($`,$');
       my $x = length($2);
-      return testAttr("$back$x$forward");
+      return _testAttr("$back$x$forward");
     } elsif (/^(\d+)\s*=(\d+)$/) {
       return ($1 == $2);
     } elsif (/^(\d+)\s*&lt;(\d+)$/) {
@@ -628,7 +647,7 @@ sub testAttr {
 
 
 # Funcao auxiliar de teste de predicados do XPath
-sub starts_with {
+sub _starts_with {
   my ($string,$preffix) = @_;
   return 0 unless ($string && $preffix);
   return 1 if ($string =~ m!^$preffix!);
@@ -637,7 +656,7 @@ sub starts_with {
 
 
 # Funcao auxiliar de teste de predicados do XPath
-sub contains {
+sub _contains {
   my ($string,$s) = @_;
   return 0 unless ($string && $s);
   return 1 if ($string =~ m!$s!);
@@ -646,7 +665,7 @@ sub contains {
 
 
 # Funcao auxiliar de teste de predicados do XPath
-sub normalize_space {
+sub _normalize_space {
   my $z = shift;
   $z =~ /^\s*(.*?)\s*$/;
   $z = $1;
@@ -655,7 +674,7 @@ sub normalize_space {
 }
 
 
-sub pathtodt {
+sub _pathtodt {
   my %h = @_;
   my %aux=();
   my %aux2=();
@@ -693,7 +712,7 @@ sub pathtodt {
 	$prefix = "^" unless (($l->[0]) or ($l->[1]));
 	$prefix = "^" if (($l->[0] eq "/") && ($l->[1]));
 	if ($l->[3]) {
-	  if(inctxt("$prefix$l->[1]") && testAttr($l->[3])) 
+	  if(inctxt("$prefix$l->[1]") && _testAttr($l->[3])) 
 	    {return &{$l->[2]}; }
 	} else {
 	  if(inctxt("$prefix$l->[1]")) {return &{$l->[2]};}
@@ -713,7 +732,7 @@ sub pathtodt {
 
 
 
-sub omni{
+sub _omni{
   my ($par, $xml, @l) = @_;
   my $type = $ty{$par} || "STR";
   my %typeargs = ();
@@ -742,7 +761,7 @@ sub omni{
     #XML::LIBXML#    if (ref($tree) eq "XML::LibXML::CDATASection") {
     #XML::LIBXML#      $name = "-pcdata";
     #XML::LIBXML#      $val = $tree->getData();
-    #XML::LIBXML#      $aux= (defined($xml->{-outputenc}))?fromUTF8($val,$xml->{-outputenc}):$val;
+    #XML::LIBXML#      $aux= (defined($xml->{-outputenc}))?_fromUTF8($val,$xml->{-outputenc}):$val;
     #XML::LIBXML#      if (defined($xml->{-pcdata})) {
     #XML::LIBXML#	      push(@dtcontext,"-pcdata");
     #XML::LIBXML#	      $c = $aux;
@@ -759,7 +778,7 @@ sub omni{
     #XML::LIBXML#      ### We will need to change this, I hope!
     #XML::LIBXML#      $val = "";
     #XML::LIBXML#      $name = "-pcdata";
-    #XML::LIBXML#      $aux= (defined($xml->{-outputenc}))?fromUTF8($val, $xml->{-outputenc}):$val;
+    #XML::LIBXML#      $aux= (defined($xml->{-outputenc}))?_fromUTF8($val, $xml->{-outputenc}):$val;
     #XML::LIBXML#      if (defined($xml->{-pcdata})) {
     #XML::LIBXML#	       push(@dtcontext,"-pcdata");
     #XML::LIBXML#	       $c = $aux;
@@ -773,7 +792,7 @@ sub omni{
       #XML::LIBXML#      $val = $tree->getData();
 
       $name = "-pcdata";
-      $aux = (defined($xml->{-outputenc}))?fromUTF8($val,$xml->{-outputenc}):$val;
+      $aux = (defined($xml->{-outputenc}))?_fromUTF8($val,$xml->{-outputenc}):$val;
 
       if (defined($xml->{-pcdata})) {
 	push(@dtcontext,"-pcdata");
@@ -783,41 +802,41 @@ sub omni{
       }
 
     } else {
-      #XML::LIBXML#      my %atr = nodeAttributes($tree);
+      #XML::LIBXML#      my %atr = _nodeAttributes($tree);
       #XML::LIBXML#      $atr = \%atr;
       #XML::PARSER#      ($atr,@val) = @$val;
 
       push(@dtcontext,$name);
       $dtcontextcount{$name}++;
       unshift(@dtatributes, $atr);
-      #XML::LIBXML#      $aux = omniele($xml, $name, omni($name, $xml, ($tree->getChildnodes())), $atr);
-      #XML::PARSER#      $aux = omniele($xml, $name, omni($name, $xml, @val), $atr);
+      #XML::LIBXML#      $aux = _omniele($xml, $name, _omni($name, $xml, ($tree->getChildnodes())), $atr);
+      #XML::PARSER#      $aux = _omniele($xml, $name, _omni($name, $xml, @val), $atr);
       shift(@dtatributes);
       pop(@dtcontext); $dtcontextcount{$name}--;
     }
     if    ($type eq "STR"){ if (defined($aux)) {$r .= $aux} ;}
     elsif ($type eq "SEQ" or $type eq "ARRAY"){
-      push(@$r, $aux) unless whitepc($aux, $name);}
+      push(@$r, $aux) unless _whitepc($aux, $name);}
     elsif ($type eq "SEQH" or $type eq "ARRAYHASH"){
       push(@$r,{"-c" => $aux,
 		"-q" => $name,
-		#XML::LIBXML# nodeAttributes($tree)
+		#XML::LIBXML# _nodeAttributes($tree)
 		#XML::PARSER# %$atr
-	       }) unless whitepc($aux,$name);
+	       }) unless _whitepc($aux,$name);
     }
     elsif($type eq "MMAPON"){
-      if(not whitepc($aux,$name)){
+      if(not _whitepc($aux,$name)){
 	if(! $typeargs{$name}) {
 	  warn "duplicated tag ´$name´\n" if(defined($r->{$name}));
 	  $r->{$name} = $aux }
-	else { push(@{$r->{$name}},$aux) unless whitepc($aux,$name)}}
+	else { push(@{$r->{$name}},$aux) unless _whitepc($aux,$name)}}
     }
     elsif($type eq "MAP" or $type eq "HASH"){
-      if(not whitepc($aux,$name)){
+      if(not _whitepc($aux,$name)){
 	warn "duplicated tag ´$name´\n" if(defined($r->{$name}));
 	$r->{$name} = $aux }}
     elsif($type eq "MULTIMAP"){
-      push(@{$r->{$name}},$aux) unless whitepc($aux,$name)}
+      push(@{$r->{$name}},$aux) unless _whitepc($aux,$name)}
     elsif($type eq "NONE"){ $r = $aux;}
     else { $r="undefined type !!!"}
   }
@@ -826,7 +845,7 @@ sub omni{
 
 
 
-sub omniele {
+sub _omniele {
   my $xml = shift;
   my $aux;
   ($q, $c, $aux) = @_;
@@ -835,7 +854,7 @@ sub omniele {
 
   if (defined($xml->{-outputenc})) {
     for (keys %v){
-      $v{$_} = fromUTF8($v{$_}, $xml->{-outputenc})
+      $v{$_} = _fromUTF8($v{$_}, $xml->{-outputenc})
     }
   }
 
@@ -854,12 +873,13 @@ sub xmltree {
 }
 
 
+# está a ser usada pela toxml1, que não é usada :-)
 
-sub toxmlp {
-  my ($q,$v,$c ) = @_;
-  if ($q eq "-pcdata") { $c }
-  else {"<$q" . join("",map {" $_=\"$v->{$_}\""} keys %$v ) . ">$c</$q>" }
-}
+# sub toxmlp {
+#   my ($q,$v,$c ) = @_;
+#   if ($q eq "-pcdata") { $c }
+#   else {"<$q" . join("",map {" $_=\"$v->{$_}\""} keys %$v ) . ">$c</$q>" }
+# }
 
 
 
@@ -878,7 +898,7 @@ sub toxml {
     if ($q eq "-pcdata") {
       return $c
     }
-    return openTag($q,$v) . "$c</$q>"
+    return _openTag($q,$v) . "$c</$q>"
   }
   elsif (ref($c) eq "HASH" && $c->{'-q'} && $c->{'-c'}) {
     my %a = %$c;
@@ -886,7 +906,7 @@ sub toxml {
     toxml($q,\%a,$c);
   }
   elsif (ref($c) eq "HASH") {
-    openTag($q,$v).
+    _openTag($q,$v).
       join("",map {($_ ne "-pcdata")
 		     ? ( (ref($c->{$_}) eq "ARRAY")
 			 ? "<$_>".
@@ -904,38 +924,40 @@ sub toxml {
 
 
 
-sub openTag{
+sub _openTag{
   "<$_[0]". join("",map {" $_=\"$_[1]{$_}\""} keys %{$_[1]} ).">"
 }
 
 
 
-sub toxml1 {
-  if(@_ == 3){return toxmlp(@_)}
-  return "" if (defined $ty{$q} && $ty{$q} eq "ZERO");
-  if(not ref($c)){  toxmlp($q,\%v,$c)}
-  elsif (ref($c) eq "ARRAY") {
-    if($ty{$q} eq "SEQH") {
-      toxmlp($q,{},
-	     join("",map {my %a=%$_; 
-			  delete @a{"-q","-c"}; 
-			  toxmlp($_->{'-q'},\%a,$_->{-c}) } @{$c} ))
-    }
-    else { toxmlp($q,\%v, join("",@{$c}))}
-  }
-  elsif (ref($c) eq "HASH") {
-    "<$q".
-      join("",map {" $_=\"$v{$_}\""} keys %v ) . ">" .
-	join("",map {($_ ne "-pcdata")
-		       ? ( (ref($c->{$_}) eq "ARRAY")
-			   ? "<$_>".
-			   join("</$_>\n<$_>", @{$c->{$_}}).
-			   "</$_>\n"
-			   : "<$_>$c->{$_}</$_>\n" )
-			 : () }
-	     keys %{$c} ) .
-	       "$c->{-pcdata}</$q>" }
-}
+# toxml1 is not being used.
+
+# sub toxml1 {
+#   if(@_ == 3){return toxmlp(@_)}
+#   return "" if (defined $ty{$q} && $ty{$q} eq "ZERO");
+#   if(not ref($c)){  toxmlp($q,\%v,$c)}
+#   elsif (ref($c) eq "ARRAY") {
+#     if($ty{$q} eq "SEQH") {
+#       toxmlp($q,{},
+# 	     join("",map {my %a=%$_; 
+# 			  delete @a{"-q","-c"}; 
+# 			  toxmlp($_->{'-q'},\%a,$_->{-c}) } @{$c} ))
+#     }
+#     else { toxmlp($q,\%v, join("",@{$c}))}
+#   }
+#   elsif (ref($c) eq "HASH") {
+#     "<$q".
+#       join("",map {" $_=\"$v{$_}\""} keys %v ) . ">" .
+# 	join("",map {($_ ne "-pcdata")
+# 		       ? ( (ref($c->{$_}) eq "ARRAY")
+# 			   ? "<$_>".
+# 			   join("</$_>\n<$_>", @{$c->{$_}}).
+# 			   "</$_>\n"
+# 			   : "<$_>$c->{$_}</$_>\n" )
+# 			 : () }
+# 	     keys %{$c} ) .
+# 	       "$c->{-pcdata}</$q>" }
+# }
 
 
 sub mkdtskel{
@@ -985,7 +1007,7 @@ END
 
 
 
-sub nodeAttributes {
+sub _nodeAttributes {
   my $node = shift;
   my %answer = ();
   my @attrs = $node->getAttributes();
@@ -1029,7 +1051,7 @@ sub mkdtdskel {
   delete $elel{$root};
 
   for ($root, keys %elel){
-    putele($_);
+    _putele($_);
     for $name (keys(%{$att{$_}})) {
        print( "\t<!-- $name : ... -->\n");
        print( "\t<!ATTLIST $_ $name CDATA #IMPLIED >\n");
@@ -1038,24 +1060,25 @@ sub mkdtdskel {
 }
 
 
+# This is NOT being used.
+#
+# sub _process_libxml {
+#   my $node = shift;
+#   my $ref = ref($node);
+#   if ($ref eq "XML::LibXML::Text") {
+#     return [0, $node->toString() ];
+#   } else {
+#     my $name = $node->getName();
+#     my %attr = ( map { ($_->getName(), $_->getValue()) } $node->getAttributes() );
 
-sub process_libxml {
-  my $node = shift;
-  my $ref = ref($node);
-  if ($ref eq "XML::LibXML::Text") {
-    return [0, $node->toString() ];
-  } else {
-    my $name = $node->getName();
-    my %attr = ( map { ($_->getName(), $_->getValue()) } $node->getAttributes() );
-
-    my $x = [ $name, [ { %attr }, map {my $w =  process_libxml($_); @$w } $node->getChildnodes()  ]];
-    return $x;
-  }
-}
+#     my $x = [ $name, [ { %attr }, map {my $w =  _process_libxml($_); @$w } $node->getChildnodes()  ]];
+#     return $x;
+#   }
+# }
 
 
 
-sub putele {
+sub _putele {
   my $e = shift;
   my @f ;
   if ($ele{$e}) {
@@ -1070,7 +1093,7 @@ sub putele {
   }
 }
 
-sub whitepc {
+sub _whitepc {
   $_[1] eq '-pcdata' and $_[0] =~ /^[ \t\n]*$/
 }
 
@@ -1078,9 +1101,11 @@ sub MMAPON {
   bless([@_],"mmapon")
 }
 
-sub SEQOF {
-  bless([@_],"seqof")
-}
+# not being used...
+#
+# sub SEQOF {
+#   bless([@_],"seqof")
+# }
 
 
 #######################################
@@ -1088,7 +1113,7 @@ sub SEQOF {
 #  Auxiliary functions for encodings  #
 #                                     #
 ### STARTLATIN1 #######################
-sub fromUTF8 {
+sub _fromUTF8 {
   my $string = shift;
   my $encode = shift;
   XML::LibXML::decodeFromUTF8($encode, $string);

@@ -58,3 +58,5 @@ t/05_strings.t
 t/06_mkdtskel.t
 t/06_output.pl
 META.yml                                 Module meta-data (added by MakeMaker)
+t/pod-coverage.t
+t/pod.t
