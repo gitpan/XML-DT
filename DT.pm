@@ -17,7 +17,7 @@ if (my $m = $INC{"bytes.pm"}) {require bytes; import bytes;}
 @EXPORT=qw(&dt &dtstring &dturl &inctxt &ctxt &mkdtskel &mkdtdskel &toxml 
  &MMAPON $c %v $q &xmltree &pathdturl
  @dtcontext %dtcontextcount @dtatributes &pathdt &pathdtstring );
-$VERSION = '0.27';
+$VERSION = '0.28';
 #XML::LIBXML# $PARSER = 'XML::LibXML';
 #XML::PARSER# $PARSER = 'XML::Parser';
 }
@@ -438,7 +438,11 @@ $return = &{$xml{-end}}
 #XML::PARSER#    $return = omni("-ROOT",\%xml, @$tree)
 }
 
-return $declr.$return;
+if ($declr) {
+   return $declr.$return;
+} else {
+   return $return;
+}
 }
 
 sub ctxt {
@@ -544,7 +548,11 @@ $return = &{$xml{-end}}
 #XML::PARSER#    $return = omni("-ROOT", \%xml, @$tree)
 }
 
-return $declr.$return;
+if ($declr) {
+   return $declr.$return;
+} else {
+   return $return;
+}
 }
 
 sub pathdt{

@@ -1,5 +1,8 @@
 Revision history for Perl extension XML::DT.
 
+0.28  Dec 16, 2003
+	- Corrected bug when outputing a data structure.
+
 0.27  Nov 14, 2003
 	- Added -declr switch. When added, dt will add the <?xml?>
 	- Added global variable $PARSER with info about what parser
