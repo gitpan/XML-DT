@@ -1,5 +1,12 @@
 Revision history for Perl extension XML::DT.
 
+0.27  Nov 14, 2003
+	- Added -declr switch. When added, dt will add the <?xml?>
+	- Added global variable $PARSER with info about what parser
+	  is being used (XML::Parser or XML::LibXML);
+	- Require a recent ExtUtils::MakeMaker. This will fix the
+	  problem with PM_FILTER syntax change (I hope)
+
 0.26  Oct 12, 2003
 	- Corrected makefile so that it detects if it should use perl
 	  5.8.0 or 5.8.1 PM_FILTER syntax;

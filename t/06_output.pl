@@ -6,7 +6,6 @@ my $filename = shift;
 #    '-outputenc' => 'ISO-8859-1',
 #    '-default'   => sub{"<$q>$c</$q>"},
      'a' => sub{
-       # remember attributes $v{}
        # occurred 1 times
        "$q:$c"
      },

@@ -4,7 +4,7 @@ $xmlparser_version = 2.30;
 $xmllibxml_version = 1.54;
 
 %req_modules = (
-		'ExtUtils::MakeMaker' => '6.03',
+		'ExtUtils::MakeMaker' => '6.17',
 		'Test::More' => '0.40',
 		'LWP::Simple' => '1.35',
 	       );
@@ -33,10 +33,10 @@ do {
 my $pattern = uc($XML);
 
 #### --- now, construct PM_FILTER
-$PM_FILTER = qq(perl -npe \\"s/\\#$pattern\\#//;\\");
-if ($^V gt v5.8.0) {
-  $PM_FILTER = qq(perl -npe \"s/\\#$pattern\\#//;\");
-}
+# $PM_FILTER = qq(perl -npe \\"s/\\#$pattern\\#//;\\");
+# if ($^V gt v5.8.0) {
+$PM_FILTER = qq(perl -npe \"s/\\#$pattern\\#//;\");
+# }
 
 WriteMakefile(
 	      'NAME'         => 'XML::DT',

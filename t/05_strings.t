@@ -37,9 +37,13 @@ is($str, "zbrzbr");
 
 ###
 
-%h5=(-default=>sub{toxml});
-$str = dt($filename, %h5);
-is(`tail -14 t/05_input.xml`,$str);
+# Isto não é portável!!!!!
+#
+# %h5=(-default=>sub{toxml});
+# $str = dt($filename, %h5);
+# is(`tail -14 t/05_input.xml`,$str);
 
 ###
 
+$str = dtstring("<foo></foo>", -declr => 1);
+is("<?xml version=\"1.0\"?>\n<foo></foo>",$str);
