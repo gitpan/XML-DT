@@ -1,0 +1,6 @@
+<!ENTITY amp SDATA "&">
+<!ELEMENT publico - - (data,artigo+)>
+<!ELEMENT artigo - - (sec, ante?, titulo, texto)>
+<!ELEMENT (data,sec,ante,titulo) - O (#PCDATA)>
+<!ELEMENT (p,st) - O (#PCDATA)>
+<!ELEMENT texto - O (p|st)+>

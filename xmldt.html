@@ -1,0 +1,440 @@
+    <HTML> 
+	<HEAD> 
+	    <TITLE>XML::DT - a package for down translation of XML to strings
+
+</TITLE> 
+	</HEAD>
+
+	<BODY>
+
+<!-- INDEX BEGIN -->
+
+<UL>
+
+	<LI><A HREF="#NAME">NAME</A>
+	<LI><A HREF="#SYNOPSIS">SYNOPSIS</A>
+	<LI><A HREF="#DESCRIPTION">DESCRIPTION</A>
+	<UL>
+
+		<LI><A HREF="#C_inctxt_function"><CODE>inctxt</CODE> function</A>
+		<LI><A HREF="#User_provided_element_processing">User provided element processing functions</A>
+		<LI><A HREF="#C_default_function"><CODE>-default</CODE> function</A>
+		<LI><A HREF="#C_outputenc_option"><CODE>-outputenc</CODE> option</A>
+		<LI><A HREF="#C_inputenc_option"><CODE>-inputenc</CODE> option</A>
+		<LI><A HREF="#C_pcdata_function"><CODE>-pcdata</CODE> function</A>
+		<LI><A HREF="#C_begin_function"><CODE>-begin</CODE> function</A>
+		<LI><A HREF="#C_end_function"><CODE>-end</CODE> function</A>
+		<LI><A HREF="#C_toxml_function"><CODE>toxml</CODE> function</A>
+	</UL>
+
+	<LI><A HREF="#Elements_with_values_other_than_">Elements with values other than strings (C<-type))</A>
+	<UL>
+
+		<LI><A HREF="#An_example_">An example:</A>
+	</UL>
+
+	<LI><A HREF="#Skeleton_generation">Skeleton generation</A>
+	<LI><A HREF="#BUGS">BUGS</A>
+	<LI><A HREF="#Author">Author</A>
+	<LI><A HREF="#NAME">NAME</A>
+	<LI><A HREF="#SYNOPSIS">SYNOPSIS</A>
+	<LI><A HREF="#Bugs">Bugs</A>
+</UL>
+<!-- INDEX END -->
+
+<HR>
+<P>
+<H1><A NAME="NAME">NAME
+
+</A></H1>
+<PRE>    XML::DT - a package for down translation of XML to strings
+</PRE>
+
+<P>
+
+<P>
+<HR>
+<H1><A NAME="SYNOPSIS">SYNOPSIS
+
+</A></H1>
+<PRE>    use XML::DT;
+</PRE>
+
+<P>
+
+<PRE>    %xml=( 'music'    =&gt; sub{&quot;Music from: $c\n&quot;},
+           'lyrics'   =&gt; sub{&quot;Lyrics from:$c\n (the value of attribute
+                               IN is:$v{IN}\n)&quot;},
+           'title'    =&gt; sub{ uc($c) },
+           '-default' =&gt; sub{&quot;$q:$c&quot;},
+           '-outputenc' =&gt; 'ISO-8859-1');
+    
+    print dt($filename,%xml);
+</PRE>
+
+<P>
+
+<PRE>    print dtstring(&quot;&lt;arq&gt;
+                    &lt;title&gt;Vejam Bem&lt;/title&gt;
+                    &lt;music&gt;Zeca Afonso&lt;/music&gt;
+                    &lt;/arq&gt;&quot;,%xml);
+</PRE>
+
+<P>
+
+<PRE>    inctxt('music/lyrics')
+    inctxt('music.*')
+</PRE>
+
+<P>
+
+<P>
+<HR>
+<H1><A NAME="DESCRIPTION">DESCRIPTION
+
+</A></H1>
+This module processes XML files with an approach similar to OMNIMARK.
+
+
+<P>
+
+Down translation function <CODE>dt</CODE> receives a filename and a set of expressions (functions) defining the
+processing and associated values for each element.
+
+
+<P>
+
+<CODE>dtstring</CODE> is similar but takes input from a string instead of a file.
+
+
+<P>
+
+<P>
+<HR>
+<H2><A NAME="C_inctxt_function"><CODE>inctxt</CODE> function
+
+</A></H2>
+<CODE>inctxt(pattern)</CODE> is true if the actual element path matches the provided pattern. This
+function is ment to be used in the element functions in order to achive
+context dependent processing. 
+
+
+<P>
+
+<P>
+<HR>
+<H2><A NAME="User_provided_element_processing">User provided element processing functions
+
+</A></H2>
+The user must provide an HASH with a function for each element, that
+computes element output. Functions can use the element name <CODE>$q</CODE>, the element content <CODE>$c</CODE> and the atribute values hash <CODE>%v</CODE>. 
+
+
+<P>
+
+All those global variables are defined in <CODE>$main::</CODE>.
+
+
+<P>
+
+Each time an element is find the associated function is called.
+
+
+<P>
+
+Content is calculated by concatenation of element contents strings and
+interior elements return values.
+
+
+<P>
+
+<P>
+<HR>
+<H2><A NAME="C_default_function"><CODE>-default</CODE> function
+
+</A></H2>
+When a element has no associated function, the function associated with 
+<CODE>-default</CODE> called. If no <CODE>-default</CODE> function is defined the default function returns a XML like string for the
+elemente.
+
+
+<P>
+
+<P>
+<HR>
+<H2><A NAME="C_outputenc_option"><CODE>-outputenc</CODE> option
+
+</A></H2>
+<CODE>-outputenc</CODE> defines the output encoding (default is Unicode UTF8).
+
+
+<P>
+
+<P>
+<HR>
+<H2><A NAME="C_inputenc_option"><CODE>-inputenc</CODE> option
+
+</A></H2>
+<CODE>-inputenc</CODE> forces a input encoding type. Whenever that is possible, define the input
+encoding in the XML file:
+
+
+<P>
+
+<PRE>   &lt;?xml version='1.0' encoding='ISO-8859-1'?&gt;
+</PRE>
+
+<P>
+
+<P>
+<HR>
+<H2><A NAME="C_pcdata_function"><CODE>-pcdata</CODE> function
+
+</A></H2>
+<CODE>-pcdata</CODE> function is used to define tranformation over the contents. Typically this
+function should look at context (see <CODE>inctxt</CODE> function)
+
+
+<P>
+
+The default <CODE>-pcdata</CODE> function is the identity
+
+
+<P>
+
+<P>
+<HR>
+<H2><A NAME="C_begin_function"><CODE>-begin</CODE> function
+
+</A></H2>
+Function to be executed before processing XML file.
+
+
+<P>
+
+Example of use: inicialization of sife-effect variables
+
+
+<P>
+
+<P>
+<HR>
+<H2><A NAME="C_end_function"><CODE>-end</CODE> function
+
+</A></H2>
+Function to be executed after processing XML file. I can use <CODE>$c</CODE> content value. The value returned by <CODE>-end</CODE> will be the <CODE>dt</CODE> return value.
+
+
+<P>
+
+Example of use: post-processing of returned contents 
+
+
+<P>
+
+<P>
+<HR>
+<H2><A NAME="C_toxml_function"><CODE>toxml</CODE> function
+
+</A></H2>
+This is the default ``-default'' function. It can be used to generate xml
+based on <CODE>$c</CODE>  <CODE>$q</CODE> and <CODE>%v</CODE> variables. Example: add a new attribute to element <CODE>ele1</CODE> without changing it:
+
+
+<P>
+
+<PRE>  %handler=( ...
+             ele1 =&gt; sub { $v{at1} = &quot;v1&quot;; toxml(); },
+           )
+</PRE>
+
+<P>
+
+<P>
+<HR>
+<H1><A NAME="Elements_with_values_other_than_">Elements with values other than strings (C<-type))
+
+</A></H1>
+By default all elements return strings, and contents (<CODE>$c</CODE>) is the concatenation of the strings returned by the sub-elements.
+
+
+<P>
+
+In some situations the XML text contains values that are better processed
+as a structured type.
+
+
+<P>
+
+The following types (functors) are available:
+
+
+<P>
+
+<PRE>     MAP  -&gt; makes an HASH with the sub elements; keys are the sub-element
+          names (returns a ref)
+     SEQ  -&gt; makes an ARRAY with all the sub elements (returns a ref)
+     MULTIMAP -&gt; makes an HASH of ARRAY; keys are the sub-element
+     STR  -&gt; concatenates all the subelements returned values (DEFAULT)
+          all the subelement sould return strings to be concatenated
+     MMAPON(elementlist) -&gt; makes an HASH with the subelements; tor elements
+          contained in the elementelist, ARRAYs are created;
+          keys are the sub-element
+</PRE>
+
+<P>
+
+<P>
+<HR>
+<H2><A NAME="An_example_">An example:
+
+</A></H2>
+<PRE>   use XML::DT;
+   %handler = ( contacts =&gt; sub{ [ split(&quot;;&quot;,$c)] },
+                -default =&gt; sub{$c},
+                -type    =&gt; { institution =&gt; 'MAP',
+                              degrees     =&gt; MMAPON('name')
+                              tels        =&gt; 'SEQ' }
+              );
+   $a = dt (&quot;f.xml&quot;, %handler);
+</PRE>
+
+<P>
+
+with the following f.xml
+
+
+<P>
+
+<PRE>    &lt;degrees&gt;
+     &lt;institution&gt;
+      &lt;id&gt;U.M.&lt;/id&gt;
+      &lt;name&gt;University of Minho&lt;/name&gt;
+      &lt;tels&gt;
+        &lt;item&gt;1111&lt;/item&gt; 
+        &lt;item&gt;1112&lt;/item&gt;
+        &lt;item&gt;1113&lt;/item&gt;
+      &lt;/tels&gt;
+      &lt;where&gt;Portugal&lt;/where&gt;
+      &lt;contacts&gt;J.Joao; J.Rocha; J.Ramalho&lt;/contacts&gt;
+     &lt;/institution&gt;
+     &lt;name&gt;Computer science&lt;/name&gt;
+     &lt;name&gt;informatic &lt;/name&gt;
+     &lt;name&gt; history &lt;/name&gt;
+    &lt;/degrees&gt;
+</PRE>
+
+<P>
+
+would make <CODE>$a</CODE>
+
+
+<P>
+
+<PRE>  { 'name' =&gt; [ 'Computer science',
+                'informatic ',
+                ' history ' ],
+    'institution' =&gt; { 'tels' =&gt; [ 1111,
+                                   1112,
+                                   1113 ],
+                       'name' =&gt; 'University of Minho',
+                       'where' =&gt; 'Portugal',
+                       'id' =&gt; 'U.M.',
+                       'contacts' =&gt; [ 'J.Joao',
+                                       ' J.Rocha',
+                                       ' J.Ramalho' ] } };
+</PRE>
+
+<P>
+
+<P>
+<HR>
+<H1><A NAME="Skeleton_generation">Skeleton generation
+
+</A></H1>
+It is possible to build an initial processor program based on an example
+
+
+<P>
+
+To do this use the function <CODE>mkdtskel(filename)</CODE>.
+
+
+<P>
+
+Example:
+
+
+<P>
+
+<PRE>  perl -MXML::DT -e 'mkdtskel &quot;f.xml&quot;' &gt; f.pl
+</PRE>
+
+<P>
+
+<P>
+<HR>
+<H1><A NAME="BUGS">BUGS
+
+</A></H1>
+The global variables <CODE>$q %v $c</CODE> are defined in main. So you may have to write <CODE>$::c</CODE> ... if you are outside main.
+
+
+<P>
+
+<P>
+<HR>
+<H1><A NAME="Author">Author
+
+</A></H1>
+Jose Joao, <A HREF="MAILTO:jj@di.uminho.pt">jj@di.uminho.pt</A>
+
+
+<P>
+
+<PRE>  <A HREF="http://www.di.uminho.pt/~jj/perl/XML/">http://www.di.uminho.pt/~jj/perl/XML/</A>
+</PRE>
+
+<P>
+
+<P>
+<HR>
+<H1><A NAME="NAME">NAME
+
+</A></H1>
+<CODE>lat1.pm</CODE> - module for unicode utf8 to latin1 translation
+
+
+<P>
+
+<P>
+<HR>
+<H1><A NAME="SYNOPSIS">SYNOPSIS
+
+</A></H1>
+<PRE>   $latin1string = lat1::utf8($utf8string)
+</PRE>
+
+<P>
+
+<P>
+<HR>
+<H1><A NAME="Bugs">Bugs
+
+</A></H1>
+Translating the laint1 subset of unicode utf8 is very simples and needs no
+tables.
+
+
+<P>
+
+If you need more complex translation, see the perl modules about unicode
+and the <CODE>recode</CODE> command.
+
+
+<P>
+
+</DL>
+    </BODY>
+
+    </HTML>

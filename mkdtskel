@@ -1,0 +1,2 @@
+
+perl -MXML::DT -e "mkdtskel qq{$1}"

@@ -1,0 +1,423 @@
+    <HTML> 
+	<HEAD> 
+	    <TITLE>README</TITLE> 
+	</HEAD>
+
+	<BODY>
+
+<!-- INDEX BEGIN -->
+
+<UL>
+
+	<LI><A HREF="#XML_DT_a_perl_XML_down_translat">XML::DT a perl XML down translate module</A>
+	<LI><A HREF="#XML_DT_a_perl_XML_down_translat">XML::DT a perl XML down translate module</A>
+	<LI><A HREF="#HOW_IT_WORKS_">HOW IT WORKS:</A>
+	<LI><A HREF="#SOME_simple_naif_examples_">SOME simple (naif) examples:</A>
+	<UL>
+
+		<LI><A HREF="#1_change_to_lowercase_the_conte">1. change to lowercase the contents of tht attribute named "a" in element "e" </A>
+		<LI><A HREF="#2_A_better_solution_of_the_prev">2. A better solution of the previous example</A>
+		<LI><A HREF="#3_make_some_statistics_and_outp">3. make some statistics and output results in HTML (using side effects)</A>
+		<LI><A HREF="#4_In_a_HTML_like_XML_document_">4. In a HTML like XML document, substitute <contents/>...<contents> by the real table of contents (a dirty solution...)</A>
+		<LI><A HREF="#5_a_more_realistic_example_fro">5. a more realistic example: from XML gcapaper DTD to latex</A>
+	</UL>
+
+	<LI><A HREF="#WORKING_WITH_STRUCTURES_INSTEAD_">WORKING WITH STRUCTURES INSTEAD OF STRINGS...</A>
+	<UL>
+
+		<LI><A HREF="#6_Build_the_natural_perl_struct">6. Build the natural perl structure of the following document</A>
+		<LI><A HREF="#7_Christmas_card_">7. Christmas card...</A>
+	</UL>
+
+</UL>
+<!-- INDEX END -->
+
+<HR>
+<P>
+<H1><A NAME="XML_DT_a_perl_XML_down_translat">XML::DT a perl XML down translate module
+
+</A></H1>
+With XML::DT, I think that:
+
+
+<P>
+
+<PRE>   . it is simple to do simple XML processing tasks :)
+   . it is simple to have the XML processor stored in a single variable
+       (see example 4)
+   . it is simple to translate XML -&gt; perl user controled complex structure 
+       with a compact &quot;-type&quot; definition  (see last section)
+</PRE>
+
+<P>
+
+Feedback wellcome -&gt; <A
+HREF="MAILTO:jj@di.uminho.pt">jj@di.uminho.pt</A>
+
+
+<P>
+
+<P>
+<HR>
+<H1><A NAME="XML_DT_a_perl_XML_down_translat">XML::DT a perl XML down translate module
+
+</A></H1>
+This document is also available in html (pod2html'ized): <A
+HREF="http://www.di.uminho.pt/~jj/perl/XML/XML-DT.readme.html">http://www.di.uminho.pt/~jj/perl/XML/XML-DT.readme.html</A>
+
+
+
+<P>
+
+<PRE> . based on XML::Parser (tree mode).
+ . design to do simple and compact translation/processing of XML document
+ . it includes some features of omnimark and sgmls.pm; functional approach
+ . it includes functions to automatic build user controled complex perl 
+       structures (see &quot;working with structures&quot; section)
+ . it was build to show my NLP perl students that it is easy to work with XML
+ . home page and download:  <A HREF="http://www.di.uminho.pt/~jj/perl/XML/DT.html">http://www.di.uminho.pt/~jj/perl/XML/DT.html</A>
+</PRE>
+
+<P>
+
+<P>
+<HR>
+<H1><A NAME="HOW_IT_WORKS_">HOW IT WORKS:
+
+</A></H1>
+<PRE> . the user must define a handler and call the basic function : 
+      dt($filename,%handler) or dtstring($string,%handler)
+ . the handler is a HASH mapping element names to functions. Handlers can 
+      have a &quot;-default&quot; function , and a &quot;-end&quot; function
+ . in order to make it smaller each function receives 3 args as global variables
+      $c - contents
+      $q - element name
+      %v - attribute values
+ . the default &quot;-default&quot; function is the identity. The function &quot;toxml&quot; makes
+      the original xml text based on $c, $q and %v values.
+ . see some advanced features in the last examples
+</PRE>
+
+<P>
+
+<P>
+<HR>
+<H1><A NAME="SOME_simple_naif_examples_">SOME simple (naif) examples:
+
+</A></H1>
+<PRE>  INDEX:
+  1. change to lowercase attribute named &quot;a&quot; in element &quot;e&quot;
+  2. better solution 
+  3. make some statistics and output results in HTML (using side effects)
+  4. In a HTML like XML document, substitute &lt;contents/&gt;...&lt;contents&gt; by the 
+      real table of contents (a dirty solution...)
+  5. a more realistic example: from XML gcapaper DTD to latex
+</PRE>
+
+<P>
+
+<PRE>  WORKING WITH STRUTURES INSTEAD OF STRINGS...
+</PRE>
+
+<P>
+
+<PRE>  6. Build the natural perl structure of the following document (ARRAY,HASH)
+  7. Multi map on...
+</PRE>
+
+<P>
+
+<P>
+<HR>
+<H2><A NAME="1_change_to_lowercase_the_conte">1. change to lowercase the contents of tht attribute named "a" in element "e" 
+
+</A></H2>
+<PRE>  use XML::DT ;
+  my $filename = shift;
+  
+  print dt($filename,
+           ( e =&gt; sub{ &quot;&lt;e a='&quot;. lc($v{a}). &quot;'&gt;$c&lt;/e&gt;&quot; }));
+</PRE>
+
+<P>
+
+<P>
+<HR>
+<H2><A NAME="2_A_better_solution_of_the_prev">2. A better solution of the previous example
+
+</A></H2>
+Ex.1 wouldn't work if we have more attributes in element e. A better
+solution is
+
+
+<P>
+
+<PRE>  print dt($filename, 
+           ( e =&gt; sub{ $v{a} = lc($v{a}); 
+                       toxml();}));
+</PRE>
+
+<P>
+
+<P>
+<HR>
+<H2><A NAME="3_make_some_statistics_and_outp">3. make some statistics and output results in HTML (using side effects)
+
+</A></H2>
+<PRE>  use XML::DT ;
+  my $filename = shift;
+</PRE>
+
+<P>
+
+<PRE>  %handler=( -default =&gt; sub{$elem_counter++;
+                             $elem_table{$q}++;&quot;&quot;;} # $q -&gt; element name
+  );
+</PRE>
+
+<P>
+
+<PRE>  dt($filename,%handler);
+</PRE>
+
+<P>
+
+<PRE>  print &quot;&lt;H3&gt;We have found $elem_counter elements in document&lt;/H3&gt;&quot;;
+  print &quot;&lt;TABLE&gt;&lt;TH&gt;ELEMENT&lt;TH&gt;OCCURS\n&quot;;
+  foreach $elem (sort keys %elem_table)
+     {print &quot;&lt;TR&gt;&lt;TD&gt;$elem&lt;TD&gt;$elem_table{$elem}\n&quot;;}
+  print &quot;&lt;/TABLE&gt;&quot;;
+</PRE>
+
+<P>
+
+<P>
+<HR>
+<H2><A NAME="4_In_a_HTML_like_XML_document_">4. In a HTML like XML document, substitute <contents/>...<contents> by the real table of contents (a dirty solution...)
+
+</A></H2>
+<PRE>  %handler=( h1 =&gt; sub{ $index .= &quot;\n$c&quot;;     toxml();},
+             h2 =&gt; sub{ $index .= &quot;\n\t$c&quot;;   toxml();},
+             h3 =&gt; sub{ $index .= &quot;\n\t\t$c&quot;; toxml();},
+             contents =&gt; sub{ $c=&quot;__CLEAN__&quot;; toxml();},
+             -end =&gt; sub{ $c =~ s/__CLEAN__/$index/; $c});
+</PRE>
+
+<P>
+
+<PRE>  print dt($filename,%handler)
+</PRE>
+
+<P>
+
+<P>
+<HR>
+<H2><A NAME="5_a_more_realistic_example_fro">5. a more realistic example: from XML gcapaper DTD to latex
+
+</A></H2>
+notes:
+
+
+<P>
+
+<PRE>  . &quot;TITLE&quot; is processed in context dependent way!
+  . output in ISOLATIN1 (this is dirty but my LaTeX doesn't support UNICODE)
+  . a stack of authors was necessary because LaTeX structure was different
+      from input structure...
+  . this example was partially created by the function mkdtskel 
+        perl -MXML::DT -e 'mkdtskel &quot;f.xml&quot;' &gt; f.pl
+      and took me about one hour to tune to real LaTeX/XML example.
+</PRE>
+
+<P>
+
+NAME gcapaper2tex.pl - a perl script to translate XML gcapaper DTD to latex
+
+
+<P>
+
+SYNOPSIS gcapaper2tex.pl mypaper.xml &gt; mupaper.tex
+
+
+<P>
+
+<PRE>  use XML::DT ;
+  my $filename = shift;
+  my $beginLatex = '\documentclass{article} \begin{document} ';
+  my $endLatex = '\end{document}';
+  
+  %handler=(
+      '-outputenc' =&gt; 'ISO-8859-1',
+      '-default'   =&gt; sub{&quot;$c&quot;},
+       'RANDLIST' =&gt; sub{&quot;\\begin{itemize}$c\\end{itemize}&quot;},
+       'AFFIL' =&gt; sub{&quot;&quot;},                              # delete affiliation
+       'TITLE' =&gt; sub{
+                    if(inctxt('SECTION')){&quot;\\section{$c}&quot;}
+                 elsif(inctxt('SUBSEC1')){&quot;\\subsection{$c}&quot;}
+                 else                    {&quot;\\title{$c}&quot;}
+              },
+       'GCAPAPER' =&gt; sub{&quot;$beginLatex $c $endLatex&quot;},
+       'PARA' =&gt; sub{&quot;$c\n\n&quot;},
+       'ADDRESS' =&gt; sub{&quot;\\thanks{$c}&quot;},
+       'PUB' =&gt; sub{&quot;} $c&quot;},
+       'EMAIL' =&gt; sub{&quot;(\\texttt{$c}) &quot;},
+       'FRONT' =&gt; sub{&quot;$c\n&quot;},
+       'AUTHOR' =&gt; sub{ push @aut, $c ; &quot;&quot;},
+       'ABSTRACT' =&gt; sub{
+        sprintf('\author{%s}\maketitle\begin{abstract}%s\end{abstract}',
+                join ('\and', @aut) ,
+                $c) },
+       'CODE.BLOCK' =&gt; sub{&quot;\\begin{verbatim}\n$c\\end{verbatim}\n&quot;},
+       'XREF' =&gt; sub{&quot;\\cite{$v{REFLOC}}&quot;},
+       'LI' =&gt; sub{&quot;\\item $c&quot;},
+       'BIBLIOG' =&gt;sub{&quot;\\begin{thebibliography}{1}$c\\end{thebibliography}\n&quot;},
+       'HIGHLIGHT' =&gt; sub{&quot; \\emph{$c} &quot;},
+       'BIO' =&gt; sub{&quot;&quot;},                                  #delete biography
+       'SURNAME' =&gt; sub{&quot; $c &quot;},
+       'CODE' =&gt; sub{&quot;\\verb!$c!&quot;},
+       'BIBITEM' =&gt; sub{&quot;\n\\bibitem{$c&quot;},
+  );
+  print dt($filename,%handler); 
+</PRE>
+
+<P>
+
+<P>
+<HR>
+<H1><A NAME="WORKING_WITH_STRUCTURES_INSTEAD_">WORKING WITH STRUCTURES INSTEAD OF STRINGS...
+
+</A></H1>
+<PRE>  the &quot;-type&quot; definition defines the way to build strutures in each case:
+</PRE>
+
+<P>
+
+<PRE>   . &quot;HASH&quot; or &quot;MAP&quot; -&gt; make an hash with the subelements;
+        keys are the subelement names; warn on repetitions;
+        returns the hash reference.
+   . &quot;ARRAY&quot; or &quot;SEQ&quot; -&gt; make an ARRAY with the subelements
+        returns an array reference.
+   . &quot;MULTIMAP&quot; -&gt; makes an HASH of ARRAY; keys are the sub-element
+   . MMAPON(name1, ...) -&gt; similar to HASH but accepts repetitions of
+        the subelements &quot;name1&quot;... (and makes an array with them)
+   . STR  -&gt;(DEFAULT) concatenates all the subelements returned values
+        all the subelement sould return strings to be concatenated
+</PRE>
+
+<P>
+
+<P>
+<HR>
+<H2><A NAME="6_Build_the_natural_perl_struct">6. Build the natural perl structure of the following document
+
+</A></H2>
+<PRE>  &lt;institution&gt;
+    &lt;id&gt;U.M.&lt;/id&gt;
+    &lt;name&gt;University of Minho&lt;/name&gt;
+    &lt;tels&gt;
+      &lt;item&gt;1111&lt;/item&gt; 
+      &lt;item&gt;1112&lt;/item&gt;
+      &lt;item&gt;1113&lt;/item&gt;
+    &lt;/tels&gt;
+    &lt;where&gt;Portugal&lt;/where&gt;
+    &lt;contacts&gt;J.Joao; J.Rocha; J.Ramalho&lt;/contacts&gt;
+  &lt;/institution&gt;
+</PRE>
+
+<P>
+
+<PRE>  use XML::DT;
+  %handler = ( -default =&gt; sub{$c},
+               -type    =&gt; { institution =&gt; 'HASH',
+                             tels        =&gt; 'ARRAY' },
+               contacts =&gt; sub{ [ split(&quot;;&quot;,$c)] },
+             );
+  
+  $a = dt(&quot;ex10.2.xml&quot;, %handler);
+</PRE>
+
+<P>
+
+<CODE>$a</CODE> is a ref to an HASH:
+
+
+<P>
+
+<PRE>  { 'tels' =&gt; [ 1111, 1112, 1113 ],
+    'name' =&gt; 'University of Minho',
+    'where' =&gt; 'Portugal',
+    'id' =&gt; 'U.M.',
+    'contacts' =&gt; [ 'J.Joao', ' J.Rocha', ' J.Ramalho' ] };
+</PRE>
+
+<P>
+
+<P>
+<HR>
+<H2><A NAME="7_Christmas_card_">7. Christmas card...
+
+</A></H2>
+We have the following address book:
+
+
+<P>
+
+<PRE>  &lt;people&gt;
+    &lt;person&gt;
+        &lt;name&gt; name0 &lt;/name&gt;
+        &lt;address&gt; address00 &lt;/address&gt;    
+        &lt;address&gt; address01 &lt;/address&gt;
+    &lt;/person&gt;
+    &lt;person&gt;
+        &lt;name&gt; name1 &lt;/name&gt;
+        &lt;address&gt; address10 &lt;/address&gt;    
+        &lt;address&gt; address11 &lt;/address&gt;
+    &lt;/person&gt;
+  &lt;/people&gt;
+</PRE>
+
+<P>
+
+Now we are going to build a structure to store the address book and write a
+Christmas card to the first address of everyone
+
+
+<P>
+
+<PRE>  #!/usr/bin/perl
+  use XML::DT;
+  %handler = ( -default =&gt; sub{$c},
+               person   =&gt; sub{ mkchristmascard($c); $c},
+               -type    =&gt; { people =&gt; 'ARRAY',
+                             person =&gt; MMAPON('address')});
+  
+  $people = dt(&quot;ex11.1.xml&quot;, %handler);
+  
+  print $people-&gt;[0]{address}[1];     # prints  address01
+</PRE>
+
+<P>
+
+<PRE>  sub mkchristmascard{ my $x=shift;
+    open(A,&quot;|lpr&quot;) or die;
+    print A &lt;&lt;&quot;.&quot;;
+    $x-&gt;{name} 
+    $x-&gt;{address}[0]
+    
+    Dear $x-&gt;{name}
+      Merry Christmas from Braga perl mongers\n
+  .
+</PRE>
+
+<P>
+
+<PRE>  close A;
+  }
+</PRE>
+
+<P>
+
+</DL>
+    </BODY>
+
+    </HTML>
