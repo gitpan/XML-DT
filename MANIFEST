@@ -5,6 +5,7 @@ DT.pm
 README
 mkdtskel
 mkdtdskel
+mkxmltype
 
 examples/arq.pl
 examples/arq.xml

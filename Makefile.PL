@@ -79,7 +79,12 @@ sub set_libxml_func {
 sub _fromUTF8 {
   my $string = shift;
   my $encode = shift;
-  XML::LibXML::decodeFromUTF8($encode, $string);
+  my $ans = eval { XML::LibXML::decodeFromUTF8($encode, $string) };
+  if ($@) {
+    return $string
+  } else {
+    return $ans
+  }
 }
 EOPERL
 }

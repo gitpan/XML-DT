@@ -22,7 +22,7 @@ BEGIN {
 	     &MMAPON $c %v $q &xmltree &pathdturl
 	     @dtcontext %dtcontextcount @dtatributes @dtattributes &pathdt &pathdtstring );
 
-  $VERSION = '0.36';
+  $VERSION = '0.37';
   #XML::LIBXML# $PARSER = 'XML::LibXML';
   #XML::PARSER# $PARSER = 'XML::Parser';
 
@@ -791,14 +791,15 @@ sub _omni{
     #XML::LIBXML#    my $tree = shift @l;
     #XML::LIBXML#    if (ref($tree) eq "XML::LibXML::CDATASection") {
     #XML::LIBXML#      $name = "-pcdata";
-    #XML::LIBXML#      $val = $tree->getData();
-    #XML::LIBXML#      $aux= (defined($xml->{-outputenc}))?_fromUTF8($val,$xml->{-outputenc}):$val;
-    #XML::LIBXML#      if (defined($xml->{-pcdata})) {
-    #XML::LIBXML#	      push(@dtcontext,"-pcdata");
-    #XML::LIBXML#	      $c = $aux;
-    #XML::LIBXML#	      $aux = &{$xml->{-pcdata}};
-    #XML::LIBXML#	      pop(@dtcontext);
-    #XML::LIBXML#      }
+    #XML::LIBXML##      $val = $tree->getData();
+    #XML::LIBXML##      print STDERR Dumper($val);
+    #XML::LIBXML##      $aux= (defined($xml->{-outputenc}))?_fromUTF8($val,$xml->{-outputenc}):$val;
+    #XML::LIBXML##      if (defined($xml->{-pcdata})) {
+    #XML::LIBXML##	      push(@dtcontext,"-pcdata");
+    #XML::LIBXML###	      $c = $aux;
+    #XML::LIBXML####	      $aux = &{$xml->{-pcdata}};
+    #XML::LIBXML##	      pop(@dtcontext);
+    #XML::LIBXML##      }
     #XML::LIBXML#    } else {
     #XML::LIBXML#      $name = $tree->getName();
     #XML::LIBXML#    }
@@ -817,7 +818,7 @@ sub _omni{
     #XML::LIBXML#	       pop(@dtcontext);
     #XML::LIBXML#      }
 
-    #XML::LIBXML#    } elsif (ref($tree) eq "XML::LibXML::Text")
+    #XML::LIBXML#    } elsif (ref($tree) eq "XML::LibXML::Text" || ref($tree) eq "XML::LibXML::CDATASection")
     #XML::PARSER#    if ($name eq "0")
     {
       #XML::LIBXML#      $val = $tree->getData();
@@ -1194,7 +1195,12 @@ sub MMAPON {
 sub _fromUTF8 {
   my $string = shift;
   my $encode = shift;
-  XML::LibXML::decodeFromUTF8($encode, $string);
+  my $ans = eval { XML::LibXML::decodeFromUTF8($encode, $string) };
+  if ($@) {
+    return $string
+  } else {
+    return $ans
+  }
 }
 ### ENDLATIN1
 

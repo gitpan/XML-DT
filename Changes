@@ -1,5 +1,8 @@
 Revision history for Perl extension XML::DT.
 
+0.37  Nov 21, 2004
+	- Parse correctly CDATA sections using XML::LibXML;
+
 0.36  Nov 19, 2004
 	- Added support for bad HTML documents;
 	- Added test for -dtd support of mkdtskel;
