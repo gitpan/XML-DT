@@ -6,5 +6,16 @@ Revision history for Perl extension xxx.
 ...
 
 0.15      Sep  16         2000
-	- problems with che changes on UNICODE
         - Bug in POD...
+	- problems with the changes on UNICODE
+       (In the present version of perl 5.6) some operations add some
+   magick information to the strings saying that are unicoded!!!
+       If you change them to other formats, they still keep that hidden 
+   information and when you try to concate them, perl will unicode them again
+       Solution changing to        tr .... UC
+
+0.16      Oct  16         2000
+	- problems with the changes on UNICODE
+        - 0.15 does not work with perl 5.005 (no tr .... UC available)..
+       Solution: "use bytes" if we find it.
+         eval("use bytes") if ($inc{bytes.pm}) { require and import...}  

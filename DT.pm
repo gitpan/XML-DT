@@ -1,13 +1,16 @@
 package XML::DT;
 
+
 BEGIN{
  use XML::Parser;
  use Exporter ();
  use vars qw($c %v $q @dtcontext @dtatributes );
+ eval "use bytes";
+ if (my $m = $INC{"bytes.pm"}) {require bytes; import bytes;}         
  @ISA=qw(Exporter);
  @EXPORT=qw(dt dtstring inctxt ctxt mkdtskel mkdtdskel toxml MMAPON $c %v $q 
          @dtcontext @dtatributes );
- $VERSION = '0.15';
+ $VERSION = '0.16';
 }
 
 =head1 NAME
@@ -221,12 +224,12 @@ This section is out of date...
 
 Jose Joao, jj@di.uminho.pt
 
-  http://www.di.uminho.pt/~jj/perl/XML/
+  http://natura.di.uminho.pt/~jj/perl/XML/
 
 thanks to 
 
   Michel Rodriguez <mrodrigu@ieee.org>
-  José Carlos Ramanlho <jcr@di.uminho.py>
+  José Carlos Ramalho <jcr@di.uminho.py>
 
 =cut
 
@@ -362,6 +365,7 @@ sub omni{
     else { $r="undefined type !!!"}
   }
   $r;
+  
 }
 
 sub omniele {
@@ -504,17 +508,17 @@ and the C<recode> command.
 
 =cut
 
-#sub utf8{
-#  my $t=shift;
-#  $t =~ s/([ÃÂ])(.)/ $1 eq "Ã" ? chr( ord($2) | 0100): $2 /ge;
-#  $t;
-#}
-
 sub utf8{
   my $t=shift;
-  if($] >= 5.006){$t =~ tr/\200-\377//UC;}
-  else           {$t =~ s/([ÃÂ])(.)/ $1 eq "Ã" ? chr( ord($2) | 0100): $2 /ge;}
+  $t =~ s/([ÃÂ])(.)/ $1 eq "Ã" ? chr( ord($2) | 0100): $2 /ge;
   $t;
 }
+
+#sub utf8{
+#  my $t=shift;
+#  if($] >= 5.006){$t =~ tr/\200-\377//UC;}
+#  else           {$t =~ s/([ÃÂ])(.)/ $1 eq "Ã" ? chr( ord($2) | 0100): $2 /ge;}
+#  $t;
+#}
 
 1;
