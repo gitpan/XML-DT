@@ -1,2 +1,3 @@
-
-perl -MXML::DT -e "mkdtskel qq{$1}"
+#!/usr/bin/perl
+ use XML::DT;
+ mkdtskel (@ARGV);

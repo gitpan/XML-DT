@@ -35,7 +35,11 @@ Revision history for Perl extension xxx.
         - better pathdt functions with
               //aaa[@att='asdasd'] (see pod file)
 
-0.20      ...  ..         2001
+0.20      Fev  20         2001
 	- installs mkdtskel shell script to be used quickly
 	- removed html files from package. User can do that with pod2html
+
+0.21      May  27         2002
+	- choice between XML::Parser ou XML::LibXML;
+
 

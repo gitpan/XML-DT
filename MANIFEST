@@ -1,8 +1,8 @@
 Changes
+t/xpath.t
 MANIFEST
 Makefile.PL
-test.pl
-DT.pm
+DT.pm.in
 README
 mkdtskel
 examples/arq.pl
