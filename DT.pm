@@ -17,7 +17,7 @@ BEGIN{
  @EXPORT=qw(&dt &dtstring &dturl &inctxt &ctxt &mkdtskel &mkdtdskel &toxml 
          &MMAPON $c %v $q &xmltree &pathdturl
          @dtcontext %dtcontextcount @dtatributes &pathdt &pathdtstring );
- $VERSION = '0.24';
+ $VERSION = '0.24.1';
 }
 
 =head1 NAME
@@ -34,6 +34,12 @@ XML::DT - a package for down translation of XML files
            '-default' => sub{"$q:$c"} );
 
     print dt($filename,%xml);
+
+=head1 ABSTRACT
+
+  This module is a XML down processor. It maps tag (element)
+  names to functions to process that element and respective
+  contents.
 
 =head1 DESCRIPTION
 
@@ -455,13 +461,13 @@ sub dturl{
   }
 }
 
-sub dtstring
-{ my ($string,%xml)=@_;
+sub dtstring {
+  my ($string,%xml)=@_;
 
   $xml{'-type'} = {} unless defined $xml{'-type'};
   %ty=(%{$xml{'-type'}}, -ROOT => "NONE");
 
-  # execute Begin action if she exists
+  # execute Begin action if it exists
   if ($xml{-begin}){ &{$xml{-begin}} }
 
 #XML::LIBXML## TODO --- how to force encoding with XML::LibXML?
@@ -502,16 +508,19 @@ sub dtstring
 #XML::PARSER## Convert XML to Perl code (Tree)
 #XML::PARSER#  $tree = $parser->parse($string);
 
+  my $return;
 
-  # Check if we have a end function
+  # Check if we have an end function
   if ($xml{-end}) {
 #XML::LIBXML#    $c = omni("-ROOT", \%xml, $tree);
 #XML::PARSER#    $c = omni("-ROOT", \%xml, @$tree);
-    &{$xml{-end}}
-  } else { 
-#XML::LIBXML#    omni("-ROOT", \%xml, $tree)
-#XML::PARSER#    omni("-ROOT", \%xml, @$tree)
+    $return = &{$xml{-end}}
+  } else {
+#XML::LIBXML#    $return = omni("-ROOT", \%xml, $tree)
+#XML::PARSER#    $return = omni("-ROOT", \%xml, @$tree)
   }
+
+  return $return;
 }
 
 sub pathdt{

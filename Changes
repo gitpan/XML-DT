@@ -1,15 +1,18 @@
 Revision history for Perl extension XML::DT.
 
+0.25  ??
+	- ...
+
 0.24  Fev .., 2003
-	- Added documentation to mkdtskel and mkdtdskel;
-	- Ispell'ed README, Changes and DT.pm(pod) files;
-	- Added ExtUtils::MakeMaker version request;
-	- Added tests (basic functions, xpath, string processing);
-	- Added code to support html parsing using libxml2 html parser;
-	- Added XPath tests; Added 'toxml' tests;
-	- Added dturl and pathdturl method;
-	- Added mkdtskel -html;
-	- Added mkdtskel -dtd;
+	- added documentation to mkdtskel and mkdtdskel;
+	- ispell'ed README, Changes and DT.pm(pod) files;
+	- added ExtUtils::MakeMaker version request;
+	- added tests (basic functions, xpath, string processing);
+	- added code to support html parsing using libxml2 html parser;
+	- added XPath tests; Added 'toxml' tests;
+	- added dturl and pathdturl method;
+	- added mkdtskel -html;
+	- added mkdtskel -dtd;
 
 0.23  Dec 23, 2002
 	- removed a lot of code on Makefile.PL. Now
