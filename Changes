@@ -1,51 +1,54 @@
-Revision history for Perl extension xxx.
+Revision history for Perl extension XML::DT.
 
-0.01  Thu Dec  3 14:49:26 1998
-	- original version; created by h2xs 1.18
+0.24  Fev .., 2003
+	- Added documentation to mkdtskel and mkdtdskel;
+	- Ispell'ed README, Changes and DT.pm(pod) files;
+	- Added ExtUtils::MakeMaker version request;
+	- Added tests (basic functions, xpath, string processing);
+	- Added code to support html parsing using libxml2 html parser;
+	- Added XPath tests; Added 'toxml' tests;
+	- Added dturl and pathdturl method;
+	- Added mkdtskel -html;
+	- Added mkdtskel -dtd;
 
-...
-
-0.15      Sep  16         2000
-        - Bug in POD...
-	- problems with the changes on UNICODE
-       (In the present version of perl 5.6) some operations add some
-   magick information to the strings saying that are unicoded!!!
-       If you change them to other formats, they still keep that hidden 
-   information and when you try to concate them, perl will unicode them again
-       Solution changing to        tr .... UC
-
-0.16      Oct  16         2000
-	- problems with the changes on UNICODE
-        - 0.15 does not work with perl 5.005 (no tr .... UC available)..
-       Solution: "use bytes" if we find it.
-         eval("use bytes") if ($inc{bytes.pm}) { require and import...}  
-
-0.17      Oct  30         2000
-        - added a -type => ZERO   that don't processes its subelements and
-       return "". It is good to avoid visiting certain parts of the document,
-       and for better performance.
-
-0.18      Nov  18         2000
-        - Bug fixed in dtd generator function: mkdtdskel
-        - possibility of passing parameters do toxml:
-              toxml(tag, {...atributes...}, contents)
-        - pathdt functions with path's instead of tag
-
-0.19      Nov  30         2000
-        - better pathdt functions with
-              //aaa[@att='asdasd'] (see pod file)
-
-0.20      Fev  20         2001
-	- installs mkdtskel shell script to be used quickly
-	- removed html files from package. User can do that with pod2html
-
-0.21      May  27         2002
-	- choice between XML::Parser ou XML::LibXML;
-
-0.22      Dec  20         2002
-	- added mkdtdskel as an installed script;
-	- added DT.pm as distribution file, for cpan indexation;
-
-0.23      ...
+0.23  Dec 23, 2002
 	- removed a lot of code on Makefile.PL. Now
 	  ExtUtils::MakeMaker takes care of the full task.
+
+0.22  Dec 20, 2002
+	- added mkdtdskel as an installed script;
+	- added DT.pm as distribution file, for cpan indexing;
+
+0.21  May 27, 2002
+	- let the user choose between XML::Parser or XML::LibXML;
+
+0.20  Fev 20, 2001
+	- installs mkdtskel shell script to be used quickly
+	- removed HTML files from package. User can do that with
+          pod2html
+
+0.19  Nov 30, 2000
+        - better pathdt functions with '//aaa[@att='asdasd']'
+
+0.18  Nov 18, 2000
+        - Bug fixed in dtd generator function: mkdtdskel
+        - possibility of passing parameters do toxml:
+              toxml(tag, {...attributes...}, contents)
+        - XPath functions to use paths instead of tags;
+
+0.17  Oct 30, 2000
+        - added a -type => ZERO that don't processes its sub-elements
+	  and return "". It is good to avoid visiting certain parts of
+          the document, and for better performance.
+
+0.16  Oct 16, 2000
+	- problems with the changes on UNICODE
+        - 0.15 does not work with Perl 5.005;
+          Solution: "use bytes" if we find it.
+          eval("use bytes") if ($inc{bytes.pm}) { require and import...}  
+
+0.15  Sep 16, 2000
+        - Corrected bug in pod;
+	- problems with the changes on UNICODE;
+
+...

@@ -1,3 +1,23 @@
 #!/usr/bin/perl
- use XML::DT;
- mkdtdskel (@ARGV);
+use XML::DT;
+mkdtdskel (@ARGV);
+
+__END__
+
+=head1 NAME
+
+mkdtskel - DTD generator using XML::DT
+
+=head1 SYNOPSIS
+
+  mkdttskel <xmlfile>
+
+=head1 DESCRIPTION
+
+This command tries to infer the DTD structure for a specific XML file;
+
+=head1 SEE ALSO
+
+XML::DT(1), mkdtskel(1) and perl(1)
+
+=cut

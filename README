@@ -1,26 +1,26 @@
-=head1 XML::DT a perl XML down translate module
+=head1 XML::DT a Perl XML down translate module
 
 With XML::DT, I think that:
 
    . it is simple to do simple XML processing tasks :)
    . it is simple to have the XML processor stored in a single variable
        (see example 4)
-   . it is simple to translate XML -> perl user controled complex structure 
+   . it is simple to translate XML -> Perl user controlled complex structure 
        with a compact "-type" definition  (see last section)
 
-Feedback wellcome -> jj@di.uminho.pt
+Feedback welcome -> jj@di.uminho.pt
 
-=head1 XML::DT a perl XML down translate module
+=head1 XML::DT a Perl XML down translate module
 
-This document is also available in html (pod2html'ized):
+This document is also available in HTML (pod2html'ized):
 http://www.di.uminho.pt/~jj/perl/XML/XML-DT.readme.html
 
  . based on XML::Parser (tree mode).
  . design to do simple and compact translation/processing of XML document
  . it includes some features of omnimark and sgmls.pm; functional approach
- . it includes functions to automatic build user controled complex perl 
+ . it includes functions to automatic build user controlled complex Perl 
        structures (see "working with structures" section)
- . it was build to show my NLP perl students that it is easy to work with XML
+ . it was build to show my NLP Perl students that it is easy to work with XML
  . home page and download:  http://www.di.uminho.pt/~jj/perl/XML/DT.html
 
 =head1 HOW IT WORKS:
@@ -34,10 +34,10 @@ http://www.di.uminho.pt/~jj/perl/XML/XML-DT.readme.html
       $q - element name
       %v - attribute values
  . the default "-default" function is the identity. The function "toxml" makes
-      the original xml text based on $c, $q and %v values.
+      the original XML text based on $c, $q and %v values.
  . see some advanced features in the last examples
 
-=head1 SOME simple (naif) examples:
+=head1 SOME simple (naive) examples:
 
   INDEX:
   1. change to lowercase attribute named "a" in element "e"
@@ -47,12 +47,12 @@ http://www.di.uminho.pt/~jj/perl/XML/XML-DT.readme.html
       real table of contents (a dirty solution...)
   5. a more realistic example: from XML gcapaper DTD to latex
 
-  WORKING WITH STRUTURES INSTEAD OF STRINGS...
+  WORKING WITH STRUCTURES INSTEAD OF STRINGS...
 
-  6. Build the natural perl structure of the following document (ARRAY,HASH)
+  6. Build the natural Perl structure of the following document (ARRAY,HASH)
   7. Multi map on...
 
-=head2 1. change to lowercase the contents of tht attribute named "a" in element "e" 
+=head2 1. change to lowercase the contents of the attribute named "a" in element "e" 
 
   use XML::DT ;
   my $filename = shift;
@@ -105,10 +105,10 @@ notes:
   . a stack of authors was necessary because LaTeX structure was different
       from input structure...
   . this example was partially created by the function mkdtskel 
-        perl -MXML::DT -e 'mkdtskel "f.xml"' > f.pl
+        Perl -MXML::DT -e 'mkdtskel "f.xml"' > f.pl
       and took me about one hour to tune to real LaTeX/XML example.
 
-NAME gcapaper2tex.pl - a perl script to translate XML gcapaper DTD to latex
+NAME gcapaper2tex.pl - a Perl script to translate XML gcapaper DTD to latex
 
 SYNOPSIS gcapaper2tex.pl mypaper.xml > mupaper.tex
 
@@ -152,21 +152,21 @@ SYNOPSIS gcapaper2tex.pl mypaper.xml > mupaper.tex
 
 =head1 WORKING WITH STRUCTURES INSTEAD OF STRINGS...
 
-  the "-type" definition defines the way to build strutures in each case:
+  the "-type" definition defines the way to build structures in each case:
 
-   . "HASH" or "MAP" -> make an hash with the subelements;
-        keys are the subelement names; warn on repetitions;
+   . "HASH" or "MAP" -> make an hash with the sub-elements;
+        keys are the sub-element names; warn on repetitions;
         returns the hash reference.
-   . "ARRAY" or "SEQ" -> make an ARRAY with the subelements
+   . "ARRAY" or "SEQ" -> make an ARRAY with the sub-elements
         returns an array reference.
    . "MULTIMAP" -> makes an HASH of ARRAY; keys are the sub-element
    . MMAPON(name1, ...) -> similar to HASH but accepts repetitions of
-        the subelements "name1"... (and makes an array with them)
-   . STR  ->(DEFAULT) concatenates all the subelements returned values
-        all the subelement sould return strings to be concatenated
+        the sub-elements "name1"... (and makes an array with them)
+   . STR  ->(DEFAULT) concatenates all the sub-elements returned values
+        all the sub-element should return strings to be concatenated
 
 
-=head2 6. Build the natural perl structure of the following document
+=head2 6. Build the natural Perl structure of the following document
 
   <institution>
     <id>U.M.</id>
@@ -190,7 +190,7 @@ SYNOPSIS gcapaper2tex.pl mypaper.xml > mupaper.tex
   $a = dt("ex10.2.xml", %handler);
 
 
-$a is a ref to an HASH:
+$a is a reference to an HASH:
 
   { 'tels' => [ 1111, 1112, 1113 ],
     'name' => 'University of Minho',
@@ -236,7 +236,7 @@ Christmas card to the first address of everyone
     $x->{address}[0]
     
     Dear $x->{name}
-      Merry Christmas from Braga perl mongers\n
+      Merry Christmas from Braga Perl mongers\n
   .
 
   close A;

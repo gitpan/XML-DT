@@ -3,9 +3,18 @@ use ExtUtils::MakeMaker;
 $xmlparser_version = 2.30;
 $xmllibxml_version = 1.52;
 
-%req_modules = ( 'Test::More' => '0.40' );
+%req_modules = (
+		'ExtUtils::MakeMaker' => '6.03',
+		'Test::More' => '0.40',
+		'LWP::Simple' => '1.35',
+	       );
 
-print "I need a XML Back-end (XML::Parser $xmlparser_version or XML::LibXML $xmllibxml_version\n";
+print "\n";
+print " NOTE: Next versions will, possibly, deprecate XML::Parser backend.\n";
+print "       At the moment, XML::LibXML is quicker than XML::Parser and\n";
+print "       supports HTML parsing\n\n";
+
+print "I need a XML Back-end (XML::Parser >= $xmlparser_version or XML::LibXML >= $xmllibxml_version\n";
 do {
   print "Sorry, I didn't understand the answer.\n" if ($answer);
   print "Should I use 'XML::Parser' or 'XML::LibXML'? [XML::LibXML] ";

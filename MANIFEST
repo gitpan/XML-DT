@@ -1,5 +1,4 @@
 Changes
-t/xpath.t
 MANIFEST
 Makefile.PL
 DT.pm
@@ -51,3 +50,8 @@ examples/XPath/ex8.pl
 examples/XPath/ex8.xml
 examples/XPath/ex8.xml
 examples/makenewexample
+
+t/00_basic.t
+t/50_xpath.t
+t/05_input.xml
+t/05_strings.t
