@@ -1,5 +1,11 @@
 Revision history for Perl extension XML::DT.
 
+0.34  Oct 30, 2004
+	- corrected '@dtattributes' instead of '@dtatributes'
+	  NOTICE: we will keep back compatibility for limited time.
+	- Renamed ID type to THE_CHILD
+	- Created LAST_CHILD type
+
 0.33  Oct 03, 2004
 	- Added ID type;
 

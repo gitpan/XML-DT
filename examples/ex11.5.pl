@@ -17,8 +17,8 @@ my $M;
 my %handler = (
    '-default'   => sub {$c},
    'article' => sub {
-           $v{issue} = $dtatributes[1]->{number};
-           $v{volume} = $dtatributes[2]->{number};
+           $v{issue} = $dtattributes[1]->{number};
+           $v{volume} = $dtattributes[2]->{number};
 
            $M .= join("\t", @v{(@order)}) . "\n";
     },

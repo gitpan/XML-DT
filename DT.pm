@@ -10,7 +10,7 @@ BEGIN {
   use Data::Dumper;
   use LWP::Simple;
   use Exporter ();
-  use vars qw($c %v $q @dtcontext %dtcontextcount @dtatributes );
+  use vars qw($c %v $q @dtcontext %dtcontextcount @dtatributes @dtattributes );
 
   # Para tirar, parece-me
   #eval "use bytes";
@@ -19,9 +19,9 @@ BEGIN {
   @ISA=qw(Exporter);
   @EXPORT=qw(&dt &dtstring &dturl &inctxt &ctxt &mkdtskel &mkdtdskel &toxml
 	     &MMAPON $c %v $q &xmltree &pathdturl
-	     @dtcontext %dtcontextcount @dtatributes &pathdt &pathdtstring );
+	     @dtcontext %dtcontextcount @dtatributes @dtattributes &pathdt &pathdtstring );
 
-  $VERSION = '0.33';
+  $VERSION = '0.34';
   #XML::LIBXML# $PARSER = 'XML::LibXML';
   #XML::PARSER# $PARSER = 'XML::Parser';
 
@@ -260,9 +260,13 @@ The following types (functors) are available:
 
 =over 4
 
-=item ID
+=item THE_CHILD
 
-returns the contents. Very similar to C<<sub{$c}>>
+Return the result of processing the only child of the element.
+
+=item LAST_CHILD
+
+Returns the result of processing the last child of the element.
 
 =item STR
 
@@ -435,6 +439,8 @@ sub dt {
 
   #XML::LIBXML## create a new LibXML parser
   #XML::LIBXML# my $parser = XML::LibXML->new();
+  #XML::LIBXML# $parser->validation(0);
+  #XML::LIBXML# $parser->load_ext_dtd(0);
 
   #XML::LIBXML## Check if we should expand entities
   #XML::LIBXML#  $parser->expand_entities(1) if defined $xml{'-noexpand'} && $xml{'-noexpand'};
@@ -749,15 +755,15 @@ sub _omni{
 
   my $r ;
 
-  if( $type eq 'STR')                                 { $r = "" }
-  elsif( $type eq 'ID')                               { $r = 0  }
-  elsif( $type eq 'SEQ'  or $type eq "ARRAY")         { $r = [] }
-  elsif( $type eq 'SEQH' or $type eq "ARRAYOFHASH")   { $r = [] }
-  elsif( $type eq 'MAP'  or $type eq "HASH")          { $r = {} }
-  elsif( $type eq 'MULTIMAP')                         { $r = {} }
-  elsif( $type eq 'MMAPON' or $type eq "HASHOFARRAY") { $r = {} }
-  elsif( $type eq 'NONE')                             { $r = "" }
-  elsif( $type eq 'ZERO')                             { return "" }
+  if( $type eq 'STR')                                   { $r = "" }
+  elsif( $type eq 'THE_CHILD' or $type eq 'LAST_CHILD') { $r = 0  }
+  elsif( $type eq 'SEQ'  or $type eq "ARRAY")           { $r = [] }
+  elsif( $type eq 'SEQH' or $type eq "ARRAYOFHASH")     { $r = [] }
+  elsif( $type eq 'MAP'  or $type eq "HASH")            { $r = {} }
+  elsif( $type eq 'MULTIMAP')                           { $r = {} }
+  elsif( $type eq 'MMAPON' or $type eq "HASHOFARRAY")   { $r = {} }
+  elsif( $type eq 'NONE')                               { $r = "" }
+  elsif( $type eq 'ZERO')                               { return "" }
 
   my ($name, $val, @val, $atr, $aux);
 
@@ -814,13 +820,15 @@ sub _omni{
       push(@dtcontext,$name);
       $dtcontextcount{$name}++;
       unshift(@dtatributes, $atr);
+      unshift(@dtattributes, $atr);
       #XML::LIBXML#      $aux = _omniele($xml, $name, _omni($name, $xml, ($tree->getChildnodes())), $atr);
       #XML::PARSER#      $aux = _omniele($xml, $name, _omni($name, $xml, @val), $atr);
       shift(@dtatributes);
+      shift(@dtattributes);
       pop(@dtcontext); $dtcontextcount{$name}--;
     }
     if    ($type eq "STR"){ if (defined($aux)) {$r .= $aux} ;}
-    elsif ($type eq "ID"){
+    elsif ($type eq "THE_CHILD" or $type eq "LAST_CHILD"){
       $r = $aux unless _whitepc($aux, $name); }
     elsif ($type eq "SEQ" or $type eq "ARRAY"){
       push(@$r, $aux) unless _whitepc($aux, $name);}
