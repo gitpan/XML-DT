@@ -7,12 +7,12 @@ BEGIN{
  @ISA=qw(Exporter);
  @EXPORT=qw(dt dtstring inctxt ctxt mkdtskel mkdtdskel toxml MMAPON $c %v $q 
          @dtcontext @dtatributes );
- $VERSION = '0.14';
+ $VERSION = '0.15';
 }
 
 =head1 NAME
 
-    XML::DT - a package for down translation of XML to strings
+XML::DT - a package for down translation of XML to strings
 
 =head1 SYNOPSIS
 
@@ -52,14 +52,14 @@ C<dtstring> is similar but takes input from a string instead of a file.
 =head2 C<inctxt> function
 
 C<inctxt(pattern)> is true if the actual element path matches the provided 
-pattern. This function is ment to be used in the element functions in order
-to achive context dependent processing. 
+pattern. This function is meant to be used in the element functions in order
+to achieve context dependent processing. 
 
 =head2 User provided element processing functions
 
 The user must provide an HASH with a function for each element,
 that computes element output. Functions can use the element name C<$q>, 
-the element content C<$c> and the atribute values hash C<%v>. 
+the element content C<$c> and the attribute values hash C<%v>. 
 
 All those global variables are defined in C<$CALLER::>.
 
@@ -72,7 +72,7 @@ interior elements return values.
 
 When a element has no associated function, the function associated with 
 C<-default> called. If no C<-default> function is defined the default function 
-returns a XML like string for the elemente.
+returns a XML like string for the element.
 
 =head2 C<-outputenc> option
 
@@ -87,7 +87,7 @@ define the input encoding in the XML file:
 
 =head2 C<-pcdata> function
 
-C<-pcdata> function is used to define tranformation over the contents.
+C<-pcdata> function is used to define transformation over the contents.
 Typically this function should look at context (see C<inctxt> function)
 
 The default C<-pcdata> function is the identity
@@ -96,7 +96,7 @@ The default C<-pcdata> function is the identity
 
 Function to be executed before processing XML file.
 
-Example of use: inicialization of sife-effect variables
+Example of use: initialization of side-effect variables
 
 =head2 C<-end> function
 
@@ -116,7 +116,7 @@ element C<ele1> without changing it:
              ele1 => sub { $v{at1} = "v1"; toxml(); },
            )
 
-=head1 Elements with values other than strings (C<-type))
+=head1 Elements with values other than strings (C<-type>)
 
 By default all elements return strings, and contents (C<$c>) is the
 concatenation of the strings returned by the sub-elements.
@@ -127,25 +127,25 @@ a structured type.
 The following types (functors) are available:
 
      STR  -> concatenates all the subelements returned values (DEFAULT)
-          all the subelement sould return strings to be concatenated
-     SEQ  -> makes an ARRAY with all the sub elements contents; attritutes are
+          all the subelement should return strings to be concatenated
+     SEQ  -> makes an ARRAY with all the sub elements contents; attributes are
           ignored (they should be processed in the subelement). (returns a ref)
      SEQH -> makes an ARRAY of HASH with all the sub elements (returns a ref);
           for each subelement: 
                  -q  => element name
                  -c  => contents
-                 at1 => at value1    for each atribute
+                 at1 => at value1    for each attribute
      MAP  -> makes an HASH with the sub elements; keys are the sub-element
-          names, values are their contents. Atributes are ignored. (they should
+          names, values are their contents. Attributes are ignored. (they should
           be processed in the subelement) (returns a ref)
      MULTIMAP -> makes an HASH of ARRAY; keys are the sub-element names;
-         values are lists of contents; atributes are ignored (they should be
+         values are lists of contents; attributes are ignored (they should be
          processed in the subelement); (returns a ref)
      MMAPON(elementlist) -> makes an HASH with the subelements; 
           keys are the sub-element names, values are their contents; 
-          atributes are ignored (they should be processed in the subelement);
-          for all the elements contained in the elementelist, it is created 
-          an ARRAY whith their contents. (returns a ref)
+          attributes are ignored (they should be processed in the subelement);
+          for all the elements contained in the elementlist, it is created 
+          an ARRAY with their contents. (returns a ref)
 
 =head2 An example:
 
@@ -173,14 +173,14 @@ with the following f.xml
       <contacts>J.Joao; J.Rocha; J.Ramalho</contacts>
      </institution>
      <name>Computer science</name>
-     <name>informatic </name>
+     <name>Informatica </name>
      <name> history </name>
     </degrees>
 
 would make $a
 
   { 'name' => [ 'Computer science',
-                'informatic ',
+                'Informatica ',
                 ' history ' ],
     'institution' => { 'tels' => [ 1111,
                                    1112,
@@ -205,7 +205,7 @@ Example:
 
 =head1 DTD skeleton generation
 
-It makes a naife DTD based on an example(s).
+It makes a naive DTD based on an example(s).
 
 To do this use the function C<mkdtdskel(filename*)>.
 
@@ -496,7 +496,7 @@ C<lat1.pm> - module for unicode utf8 to latin1 translation
 
 =head1 Bugs
 
-Translating the laint1 subset of unicode utf8 is very simples and needs no
+Translating the latin1 subset of unicode utf8 is very simples and needs no
 tables.
 
 If you need more complex translation, see the perl modules about unicode
@@ -504,9 +504,16 @@ and the C<recode> command.
 
 =cut
 
+#sub utf8{
+#  my $t=shift;
+#  $t =~ s/([ÃÂ])(.)/ $1 eq "Ã" ? chr( ord($2) | 0100): $2 /ge;
+#  $t;
+#}
+
 sub utf8{
   my $t=shift;
-  $t =~ s/([ÃÂ])(.)/ $1 eq "Ã" ? chr( ord($2) | 0100): $2 /ge;
+  if($] >= 5.006){$t =~ tr/\200-\377//UC;}
+  else           {$t =~ s/([ÃÂ])(.)/ $1 eq "Ã" ? chr( ord($2) | 0100): $2 /ge;}
   $t;
 }
 
