@@ -21,7 +21,7 @@ BEGIN {
 	     &MMAPON $c %v $q &xmltree &pathdturl
 	     @dtcontext %dtcontextcount @dtatributes &pathdt &pathdtstring );
 
-  $VERSION = '0.30';
+  $VERSION = '0.31';
   #XML::LIBXML# $PARSER = 'XML::LibXML';
   #XML::PARSER# $PARSER = 'XML::Parser';
 
@@ -33,14 +33,14 @@ XML::DT - a package for down translation of XML files
 
 =head1 SYNOPSIS
 
-use XML::DT;
+ use XML::DT;
 
-%xml=( 'music'    => sub{"Music from: $c\n"},
-   'lyrics'   => sub{"Lyrics from: $v{name}\n"},
-   'title'    => sub{ uc($c) },
-   '-default' => sub{"$q:$c"} );
+ %xml=( 'music'    => sub{"Music from: $c\n"},
+        'lyrics'   => sub{"Lyrics from: $v{name}\n"},
+        'title'    => sub{ uc($c) },
+        '-default' => sub{"$q:$c"} );
 
-print dt($filename,%xml);
+ print dt($filename,%xml);
 
 =head1 ABSTRACT
 
@@ -59,9 +59,9 @@ If you use XML::LibXML module as backend, you can parse HTML files as
 if they were XML files. For this, you must supply an extra option to
 the hash:
 
-%hander = ( -html => 1,
-      ...
-    );
+ %hander = ( -html => 1,
+             ...
+           );
 
 =head2 C<dt> function
 
@@ -84,34 +84,34 @@ Internet url instead of a file.
 The C<pathdt> function is a C<dt> function which can handle a subset
 of XPath on handler keys. Example:
 
-%handler = (
-"article/title" => sub{ toxml("h1",{},$c) },
-"section/title" => sub{ toxml("h2",{},$c) },
-"title"         => sub{ $c },
-"//image[@type='jpg']" => sub{ "JPEG: <img src=\"$c\">" },
-"//image[@type='bmp']" => sub{ "BMP: sorry, no bitmaps on the web" },
-)
+ %handler = (
+   "article/title"        => sub{ toxml("h1",{},$c) },
+   "section/title"        => sub{ toxml("h2",{},$c) },
+   "title"                => sub{ $c },
+   "//image[@type='jpg']" => sub{ "JPEG: <img src=\"$c\">" },
+   "//image[@type='bmp']" => sub{ "BMP: sorry, no bitmaps on the web" },
+ )
 
-pathdt($filename,%handler);
+ pathdt($filename,%handler);
 
 Here are some examples of valid XPath expressions under XML::DT:
 
-/aaa
-/aaa/bbb
-//ccc                           - ccc somewhere (same as "ccc")
-/*/aaa/*
-//*                             - same as "-default"
-/aaa[@id]                       - aaa with an attribute id
-/*[@*]                          - root with an attribute
-/aaa[not(@name)]                - aaa with no attribute "name"
-//bbb[@name='foo']              - ... attribute "name" = "foo"
-/ccc[normalize-space(@name)='bbb']
-//*[name()='bbb']               - complex way of saying "//bbb"
-//*[starts-with(name(),'aa')]   - an element named "aa.*"
-//*[contains(name(),'c')]       - an element       ".*c.*"
-//aaa[string-length(name())=4]                     "...."
-//aaa[string-length(name())&lt;4]                  ".{1,4}"
-//aaa[string-length(name())&gt;5]                  ".{5,}"
+ /aaa
+ /aaa/bbb
+ //ccc                           - ccc somewhere (same as "ccc")
+ /*/aaa/*
+ //*                             - same as "-default"
+ /aaa[@id]                       - aaa with an attribute id
+ /*[@*]                          - root with an attribute
+ /aaa[not(@name)]                - aaa with no attribute "name"
+ //bbb[@name='foo']              - ... attribute "name" = "foo"
+ /ccc[normalize-space(@name)='bbb']
+ //*[name()='bbb']               - complex way of saying "//bbb"
+ //*[starts-with(name(),'aa')]   - an element named "aa.*"
+ //*[contains(name(),'c')]       - an element       ".*c.*"
+ //aaa[string-length(name())=4]                     "...."
+ //aaa[string-length(name())&lt;4]                  ".{1,4}"
+ //aaa[string-length(name())&gt;5]                  ".{5,}"
 
 Note that not all XPath is currently handled by XML::DT. A lot of
 XPath will never be added to XML::DT because is not in accordance with
@@ -139,27 +139,37 @@ This is the default "-default" function. It can be used to generate
 XML based on C<$c> C<$q> and C<%v> variables. Example: add a new
 attribute to element C<ele1> without changing it:
 
-%handler=( ...
+   %handler=( ...
      ele1 => sub { $v{at1} = "v1"; toxml(); },
    )
 
 C<toxml> can also be used with 3 arguments: tag, attributes and contents
 
-toxml("a",{href=> "http://local/f.html"}, "example")
+   toxml("a",{href=> "http://local/f.html"}, "example")
 
 returns:
 
-<a href='http://local/f.html'>example</a>
+ <a href='http://local/f.html'>example</a>
 
 =head2 C<xmltree> function
 
 This simple function just makes a HASH reference:
 
-{ -c => $c, -q => $q, all_the_other_attributes }
+ { -c => $c, -q => $q, all_the_other_attributes }
 
 The function C<toxml> understands this structure and makes XML with it.
 
+=head1 Accessing parents
 
+With XML::DT you can access an element parent (or grand-parent)
+attributes, till the root of the XML document.
+
+If you use c<$dtattributes[1]{foo} = 'bar'> on a processing function,
+you are defining the attribute C<foo> for that element parent.
+
+In the same way, you can use C<$dtattributes[2]> to access the
+grand-parent. C<$dtattributes[-1]> is, as expected, the XML document
+root element.
 
 
 =head1 User provided element processing functions
@@ -193,7 +203,7 @@ C<-outputenc> defines the output encoding (default is Unicode UTF8).
 C<-inputenc> forces a input encoding type. Whenever that is possible,
 define the input encoding in the XML file:
 
-<?xml version='1.0' encoding='ISO-8859-1'?>
+ <?xml version='1.0' encoding='ISO-8859-1'?>
 
 =head2 C<-pcdata> function
 
@@ -247,9 +257,9 @@ If you have different types of sub-elements, you should use SEQH
 makes an ARRAY of HASH with all the sub elements (returns a ref); for
 each sub-element:
 
--q  => element name
--c  => contents
-at1 => at value1    for each attribute
+ -q  => element name
+ -c  => contents
+ at1 => at value1    for each attribute
 
 =item MAP
 
@@ -275,9 +285,9 @@ ref)
 
 return a reference to an HASH with:
 
--q  => element name
--c  => contents
-at1 => at value1    for each attribute
+ -q  => element name
+ -c  => contents
+ at1 => at value1    for each attribute
 
 =item ZERO
 
@@ -290,46 +300,44 @@ function returning just the contents C<sub{$id}>.
 
 =head2 An example:
 
-use XML::DT;
-%handler = ( contacts => sub{ [ split(";",$c)] },
-	-default => sub{$c},
-	-type    => { institution => 'MAP',
-		      degrees     =>  MMAPON('name')
-		      tels        => 'SEQ' }
-      );
-$a = dt ("f.xml", %handler);
+ use XML::DT;
+ %handler = ( contacts => sub{ [ split(";",$c)] },
+              -default => sub{$c},
+	      -type    => { institution => 'MAP',
+	                    degrees     =>  MMAPON('name')
+		            tels        => 'SEQ' }
+            );
+ $a = dt ("f.xml", %handler);
 
 with the following f.xml
 
-<degrees>
-<institution>
-<id>U.M.</id>
-<name>University of Minho</name>
-<tels>
-<item>1111</item>
-<item>1112</item>
-<item>1113</item>
-</tels>
-<where>Portugal</where>
-<contacts>J.Joao; J.Rocha; J.Ramalho</contacts>
-</institution>
-<name>Computer science</name>
-<name>Informatica </name>
-<name> history </name>
-</degrees>
+ <degrees>
+    <institution>
+       <id>U.M.</id>
+       <name>University of Minho</name>
+       <tels>
+          <item>1111</item>
+          <item>1112</item>
+          <item>1113</item>
+       </tels>
+       <where>Portugal</where>
+       <contacts>J.Joao; J.Rocha; J.Ramalho</contacts>
+    </institution>
+    <name>Computer science</name>
+    <name>Informatica </name>
+    <name> history </name>
+ </degrees>
 
 would make $a
 
-{ 'name' => [ 'Computer science',
-	'Informatica ',
-	' history ' ],
-'institution' => { 'tels' => [ 1111,
-			   1112,
-			   1113 ],
-	       'name' => 'University of Minho',
-	       'where' => 'Portugal',
-	       'id' => 'U.M.',
-	       'contacts' => [ 'J.Joao',
+ { 'name' => [ 'Computer science',
+               'Informatica ',
+	       ' history ' ],
+   'institution' => { 'tels' => [ 1111, 1112, 1113 ],
+  	              'name' => 'University of Minho',
+	              'where' => 'Portugal',
+	              'id' => 'U.M.',
+	              'contacts' => [ 'J.Joao',
 			       ' J.Rocha',
 			       ' J.Ramalho' ] } };
 
@@ -342,8 +350,8 @@ To do this use the function C<mkdtskel(filename)>.
 
 Example:
 
-perl -MXML::DT -e 'mkdtskel "f.xml"' > f.pl
-
+ perl -MXML::DT -e 'mkdtskel "f.xml"' > f.pl
+ 
 =head1 DTD skeleton generation
 
 It makes a naive DTD based on an example(s).
@@ -352,7 +360,7 @@ To do this use the function C<mkdtdskel(filename*)>.
 
 Example:
 
-perl -MXML::DT -e 'mkdtdskel "f.xml"' > f.dtd
+ perl -MXML::DT -e 'mkdtdskel "f.xml"' > f.dtd
 
 =head1 SEE ALSO
 
