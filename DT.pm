@@ -21,7 +21,7 @@ BEGIN {
 	     &MMAPON $c %v $q &xmltree &pathdturl
 	     @dtcontext %dtcontextcount @dtatributes @dtattributes &pathdt &pathdtstring );
 
-  $VERSION = '0.34';
+  $VERSION = '0.35';
   #XML::LIBXML# $PARSER = 'XML::LibXML';
   #XML::PARSER# $PARSER = 'XML::Parser';
 
