@@ -13,7 +13,7 @@ is(XML::DT::_normalize_space(" spaces   in   \t the middle\t"),
    "spaces in the middle");
 
 # toxml as function
-is(toxml("a",{},""), "<a></a>");
+is(toxml("a",{},""), "<a/>");
 is(toxml("a",{},"c"), "<a>c</a>");
 is(toxml("a",{a=>1},"c"), "<a a=\"1\">c</a>");
 

@@ -1,5 +1,10 @@
 Revision history for Perl extension XML::DT.
 
+0.39  Mar 22, 2005
+	- Added open '-ignorecase' to look to tag names and attributes
+	  as the same although they differ in case
+	- toxml creates empty tag if $c equals to ""
+
 0.38  Dec 24, 2004
 	- MERRY CHRISTMAS
 	- Removed Test::Pod and Test::Pod::Coverage from Makefile.PL

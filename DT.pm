@@ -22,7 +22,7 @@ BEGIN {
 	     &MMAPON $c %v $q &xmltree &pathdturl
 	     @dtcontext %dtcontextcount @dtatributes @dtattributes &pathdt &pathdtstring );
 
-  $VERSION = '0.38';
+  $VERSION = '0.39';
   #XML::LIBXML# $PARSER = 'XML::LibXML';
   #XML::PARSER# $PARSER = 'XML::Parser';
 
@@ -837,6 +837,16 @@ sub _omni{
       #XML::LIBXML#      $atr = \%atr;
       #XML::PARSER#      ($atr,@val) = @$val;
 
+      if (exists($xml->{-ignorecase})) {
+	$name = lc($name);
+	for (keys %$atr) {
+	  my ($k,$v) = (lc($_),$atr->{$_});
+	  delete($atr->{$_});
+	  $atr->{$k} = $v;
+	}
+      }
+
+
       push(@dtcontext,$name);
       $dtcontextcount{$name}++;
       unshift(@dtatributes, $atr);
@@ -932,8 +942,11 @@ sub toxml {
   if (not ref($c)) {
     if ($q eq "-pcdata") {
       return $c
+    } elsif ($c eq "") {
+      return _emptyTag($q,$v)
+    } else {
+      return _openTag($q,$v) . "$c</$q>"
     }
-    return _openTag($q,$v) . "$c</$q>"
   }
   elsif (ref($c) eq "HASH" && $c->{'-q'} && $c->{'-c'}) {
     my %a = %$c;
@@ -960,6 +973,10 @@ sub toxml {
 
 sub _openTag{
   "<$_[0]". join("",map {" $_=\"$_[1]{$_}\""} keys %{$_[1]} ).">"
+}
+
+sub _emptyTag{
+  "<$_[0]". join("",map {" $_=\"$_[1]{$_}\""} keys %{$_[1]} )."/>"
 }
 
 

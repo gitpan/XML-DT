@@ -46,7 +46,7 @@ is($str, "zbrzbr");
 ###
 
 $str = dtstring("<foo></foo>", -declr => 1);
-is("<?xml version=\"1.0\"?>\n<foo></foo>",$str);
+is("<?xml version=\"1.0\"?>\n<foo/>",$str);
 
 ###
 

@@ -1,6 +1,7 @@
 #!/usr/bin/perl -w -s
 use XML::DT;
 use Data::Dumper;
+use Term::ReadLine;
 #use locale;
 
 use strict;
@@ -10,6 +11,7 @@ our ($lines,$t,$shell);
 
 my (@files)=@ARGV;
 @ARGV=();
+
 
 
 mkxmltypes (@files);
@@ -24,6 +26,7 @@ sub mkxmltypes {
 
   my %ele=();
   my %elel=();
+  my %atl=();
   my %handler=(
 #    '-outputenc' => 'ISO-8859-1',
     '-default'   => sub{ 
@@ -33,6 +36,7 @@ sub mkxmltypes {
           if(ctxt(1)){ $ele{ctxt(1)}{$q} ++;}
           else       { $root{$q}++}
           for(keys(%v)){
+              $atl{$_}++;
               $att{$q}{$_}{tipo($v{$_})||"_str"} ++  ;
               $dom{$q}{$_}{$v{$_}} ++ } 
           "'$q',";
@@ -54,7 +58,6 @@ sub mkxmltypes {
   }
 
   print "# ", join(" ",keys %root)," ...",  scalar(localtime(time)) ,"\n";
-##  delete $elel{$root};
 
   my %resumofinal=();
   for (keys %type){
@@ -62,24 +65,26 @@ sub mkxmltypes {
      for my $lista (@{$type{$_}}){ push (@tipo, processa($lista)) }
      $resumofinal{$_}=resumele(processa2([@tipo])).resumeatts($att{$_});
   }
-  #  print Dumper \%resumofinal;
-  
 
-  if($shell){ shell($t,\%root,\%ele,\%att,\%dom,\%resumofinal); }
+  if($shell){ shell($t,\%root,\%ele,\%att,\%dom,\%resumofinal,\%atl); }
   else{       pprint(\%resumofinal,ordem(\%ele,(($t) ||(keys %root) ))); }
-  #DEBUG print Dumper \%type;
 }
 
 sub shell{
-    my ($t,$root,$ele,$att,$dom,$resumofinal) = @_;
+    my ($t,$root,$ele,$att,$dom,$resumofinal,$atl) = @_;
     my $last=(keys %$root)[0];
     my $elepat = q{[\w:]+};
     my $max = 10;
+    my $term = new Term::ReadLine 'sample';
+    my $tas = $term->Attribs;
+    $tas->{completion_entry_function}= $tas->{list_completion_function};
+    $tas->{completion_word} = [ keys(%$ele), keys(%$atl) ];
+
     pprint($resumofinal,ordem($ele,(($t) ||(keys %$root) )));
-    print "\n? ";
-    while(<>){ chomp(); 
+    while ( defined ($_ = $term->readline("\npfs> ")) ) {
+      chomp(); 
+      $term->addhistory($_) if /\S/;
       s/^\s*(.*?)\s*$/$1/;
-      print "\n";
       if(/($elepat)\[\@?($elepat)\]/){
          print resumeatt($att->{$1}{$2},$dom->{$1}{$2},$max);
          $last = $1}
@@ -92,11 +97,11 @@ sub shell{
       else{
          for my $e (keys %$att){
            for my $a (keys %{$att->{$e}}){
-            print "$e($a):",resumeatt($att->{$e}{$a},$dom->{$e}{$a},$max) if($a eq $_)
+            print "$e($a):",
+                  resumeatt($att->{$e}{$a},$dom->{$e}{$a},$max) if($a eq $_)
            }
-         }}
- 
-      print "\n? ";
+         }
+      }
     } 
 }
 
