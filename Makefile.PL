@@ -16,10 +16,6 @@ $xmllibxml_version = 1.54;
 		'Test::More' => '0.40',
 		'LWP::Simple' => '1.35',
 		'XML::DTDParser' => '2.00',
-		# we can remove these two from here, given the tests
-		# can cope with their inexistence.
-		'Test::Pod::Coverage' => '0.08',
-		'Test::Pod' => '1.00',
 	       );
 
 if ($PARSER) {

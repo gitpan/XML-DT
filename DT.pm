@@ -22,7 +22,7 @@ BEGIN {
 	     &MMAPON $c %v $q &xmltree &pathdturl
 	     @dtcontext %dtcontextcount @dtatributes @dtattributes &pathdt &pathdtstring );
 
-  $VERSION = '0.37';
+  $VERSION = '0.38';
   #XML::LIBXML# $PARSER = 'XML::LibXML';
   #XML::PARSER# $PARSER = 'XML::Parser';
 
@@ -220,7 +220,7 @@ with C<-default> called. If no C<-default> function is defined the
 default function returns a XML like string for the element.
 
 When you use C</-type> definitions, you often need do set C<-default>
-function to return just the contents: C<sub{$id}>.
+function to return just the contents: C<sub{$c}>.
 
 =head2 C<-outputenc> option
 
@@ -455,11 +455,13 @@ sub dt {
 
   #XML::LIBXML## create a new LibXML parser
   #XML::LIBXML# my $parser = XML::LibXML->new();
-  #XML::LIBXML# $parser->validation(0);
-  #XML::LIBXML# $parser->load_ext_dtd(0);
 
-  #XML::LIBXML## Check if we should expand entities
-  #XML::LIBXML#  $parser->expand_entities(1) if defined $xml{'-noexpand'} && $xml{'-noexpand'};
+
+  #### We don't wan't DT to load everytime the DTD (I Think!)
+  #XML::LIBXML# $parser->validation(0);
+  #XML::LIBXML# $parser->expand_xinclude(0);  # testing
+  #XML::LIBXML# $parser->load_ext_dtd(0);
+  #XML::LIBXML# $parser->expand_entities(0);
 
   #XML::LIBXML## parse the file
   #XML::LIBXML#  my $doc;
@@ -574,9 +576,6 @@ sub dtstring {
 
   #XML::LIBXML## create a new LibXML parser
   #XML::LIBXML#  my $parser = XML::LibXML->new();
-
-  #XML::LIBXML## Check if we should expand entities
-  #XML::LIBXML#  $parser->expand_entities(0) if defined $xml{'-noexpand'} && $xml{'-noexpand'};
 
   #XML::LIBXML## parse the string
   #XML::LIBXML#  my $doc;
@@ -863,13 +862,13 @@ sub _omni{
     elsif($type eq "MMAPON"){
       if(not _whitepc($aux,$name)){
 	if(! $typeargs{$name}) {
-	  warn "duplicated tag ´$name´\n" if(defined($r->{$name}));
+	  warn "duplicated tag '$name'\n" if(defined($r->{$name}));
 	  $r->{$name} = $aux }
 	else { push(@{$r->{$name}},$aux) unless _whitepc($aux,$name)}}
     }
     elsif($type eq "MAP" or $type eq "HASH"){
       if(not _whitepc($aux,$name)){
-	warn "duplicated tag ´$name´\n" if(defined($r->{$name}));
+	warn "duplicated tag '$name'\n" if(defined($r->{$name}));
 	$r->{$name} = $aux }}
     elsif($type eq "MULTIMAP"){
       push(@{$r->{$name}},$aux) unless _whitepc($aux,$name)}
@@ -954,10 +953,9 @@ sub toxml {
 	     "$c->{-pcdata}</$q>" } ########  "NOTYetREady"
   elsif (ref($c) eq "ARRAY") {
     if($ty{$q} eq "SEQH"){toxml($q,$v,join("\n",map {toxml($_)} @$c))}
-    else                 {toxml($q,\%v, join("",@{$c}))}
+    else                 {toxml($q,$v,join("",@{$c}))}
   }
 }
-
 
 
 sub _openTag{

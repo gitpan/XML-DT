@@ -1,23 +1,40 @@
-#!/usr/bin/perl -s
+#!/usr/bin/perl -w -s
 use XML::DT;
 use Data::Dumper;
-use locale;
+#use locale;
+
+use strict;
 
 our ($latin1,$html,$show_att,$expand_att_id);
+our ($lines,$t,$shell);
 
-mkdtdskel (@ARGV);
+my (@files)=@ARGV;
+@ARGV=();
 
-sub mkdtdskel {
+
+mkxmltypes (@files);
+
+
+sub mkxmltypes {
+  my %type=();
   my @files = @_;
+  my %root = ();
+  my %att=();
+  my %dom=();
+
+  my %ele=();
+  my %elel=();
   my %handler=(
-    '-outputenc' => 'ISO-8859-1',
+#    '-outputenc' => 'ISO-8859-1',
     '-default'   => sub{ 
           $c =~ s/,$//;
           push(@{$type{$q}}, (eval("[$c]") || "?$c"));
           $elel{$q}++;
-          $root = $q unless ctxt(1);
-          $ele{ctxt(1)}{$q} ++;
-          for(keys(%v)){$att{$q}{$_}{tipo($v{$_})||$v{$_}} ++ } ;
+          if(ctxt(1)){ $ele{ctxt(1)}{$q} ++;}
+          else       { $root{$q}++}
+          for(keys(%v)){
+              $att{$q}{$_}{tipo($v{$_})||"_str"} ++  ;
+              $dom{$q}{$_}{$v{$_}} ++ } 
           "'$q',";
         },
     '-pcdata'    => sub{ if ($c =~ /[^ \t\n]/){ $ele{ctxt(1)}{"#PCDATA"}=1;
@@ -27,37 +44,108 @@ sub mkdtdskel {
   if  ($html) { $handler{'-html'} = 1;} 
   if($latin1) { $handler{'-inputenc'}='ISO-8859-1';}
 
-  for $filename (@files){
-  dt($filename,%handler); 
+  for my $fname (@files){
+    if($lines){
+      system("head -$lines $fname | xmllint --recover - > /tmp/_xml_$$");
+      $fname = "/tmp/_xml_$$";
+    }
+    dt($fname,%handler); 
+    unlink("/tmp/_xml_$$") if $lines;
   }
 
-  print "# $root " . localtime(time) ."\n";
-  delete $elel{$root};
+  print "# ", join(" ",keys %root)," ...",  scalar(localtime(time)) ,"\n";
+##  delete $elel{$root};
 
+  my %resumofinal=();
   for (keys %type){
-     @tipo=();
+     my @tipo=();
      for my $lista (@{$type{$_}}){ push (@tipo, processa($lista)) }
-     $resumofinal{$_}=resumele(processa2([@tipo])).resumeatt($att{$_});
+     $resumofinal{$_}=resumele(processa2([@tipo])).resumeatts($att{$_});
   }
-  print Dumper \%resumofinal;
-#  print Dumper \%type;
+  #  print Dumper \%resumofinal;
+  
+
+  if($shell){ shell($t,\%root,\%ele,\%att,\%dom,\%resumofinal); }
+  else{       pprint(\%resumofinal,ordem(\%ele,(($t) ||(keys %root) ))); }
+  #DEBUG print Dumper \%type;
+}
+
+sub shell{
+    my ($t,$root,$ele,$att,$dom,$resumofinal) = @_;
+    my $last=(keys %$root)[0];
+    my $elepat = q{[\w:]+};
+    my $max = 10;
+    pprint($resumofinal,ordem($ele,(($t) ||(keys %$root) )));
+    print "\n? ";
+    while(<>){ chomp(); 
+      s/^\s*(.*?)\s*$/$1/;
+      print "\n";
+      if(/($elepat)\[\@?($elepat)\]/){
+         print resumeatt($att->{$1}{$2},$dom->{$1}{$2},$max);
+         $last = $1}
+      elsif(/\!max\s*=?\s*(\d+)/){$max=$1;}
+      elsif(/\.($elepat)/){
+         print resumeatt($att->{$last}{$1},$dom->{$last}{$1},$max);}
+      elsif(!$_ or defined $ele->{$_}) {
+         $last=$_; 
+         pprint($resumofinal,ordem($ele,(($_) ||(keys %$root) ))); }
+      else{
+         for my $e (keys %$att){
+           for my $a (keys %{$att->{$e}}){
+            print "$e($a):",resumeatt($att->{$e}{$a},$dom->{$e}{$a},$max) if($a eq $_)
+           }
+         }}
+ 
+      print "\n? ";
+    } 
+}
+
+sub ordem{
+  my ($rel,@st)=@_;
+  my @r=();
+  my %visited = ('#PCDATA' => 1);
+
+  while(@st){
+    my $next = shift(@st);
+    next if $visited{$next};
+    push(@r,$next);
+    $visited{$next} = 1;
+    push(@st, (grep {! $visited{$_}} (keys %{$rel->{$next}})));
+  }
+  \@r;
+}
+
+sub pprint{
+  my $r     = shift;
+  my $order = shift;
+  for (@$order){ print "$_ \t=>  $r->{$_}\n";}
+}
+
+sub resumeatts{
+ my $a=shift;
+ my $r="";
+ for (keys(%{$a})) {
+   if($expand_att_id){ $r .= "\n\t\t * $_:(".join(",",keys %{$a->{$_}}) . ")" }
+   else              { $r .= " * $_" }
+ }
+ $r
 }
 
 sub resumeatt{
  my $a=shift;
- my $r="";
- for (keys(%{$a})) {
-   if($expand_att_id){ $r .= "\n * $_:(".join(",",keys %{$a->{$_}}) . ")" }
-   else              { $r .= " * $_" }
- }
- $r
+ my $d=shift;
+ my $max = shift(@_) || 10;
+ my $r= join("|",keys %{$a}) ;
+ my @domact = (grep {defined $_} ((keys %{$d}))[0..$max]);
+ $domact[$max] = '...' if $domact[$max];
+ $r . " = {". join(",",@domact) . "}\n";
 }
 
 sub processa{
  my $a=shift;
  if( @$a == 0 ) {            +{ _isa =>"empty"} }
  elsif( @$a == 1 && $a->[0] eq '#PCDATA') { 
-                             +{ _isa =>"text",$a->[0] =>[1,1]} }
+                             +{ _isa =>"text"     ,$a->[0] =>[1,1]} }
  elsif( @$a == 1 )       {   +{ _isa =>"singleton",$a->[0] =>[1,1]} }
  else{ my %f = (); 
        for (@$a){$f{$_}[0]++,$f{$_}[1]++} 
@@ -71,29 +159,35 @@ sub processa{
 
 sub processa2{
  my $a=shift;
- if   ( @$a == 0 ) { "?" }
+ if   ( @$a == 0 ) { die("no sons????") }
  elsif( @$a == 1 ) { $a->[0] }
  else{ 
-   my %f = (); 
+   my %f     = (); 
    my %maybe = ();
-   for (@$a){$f{suns2str($_)}++;
+   for (@$a){$f{sons2str($_)}++;
              $maybe{$_->{_isa}}++ } 
    my $dif = scalar keys %f;
    if   ($dif == 1)    { $a->[0]; }
-   elsif($maybe{mixed} || $maybe{text}){ +{%{join_suns($a)}, _isa=> "mixed"} }
-       else                            { +{%{join_suns($a)}, _isa=> "mtup"} }
+   elsif($maybe{mixed} || $maybe{text}){ +{%{join_sons($a)}, _isa=> "mixed"} }
+   else { my %s= %{join_sons($a)};
+          if(keys %s == 1) { +{%s, _isa => "seq"}}
+          else             { +{%s, _isa => "mtup"} }
+   }
  }
 }
 
 sub resumele{
  my $a=shift;
+##  print Dumper($a);
  my $i = $a->{_isa};
  delete $a->{_isa};
  if    ($i eq "text")      {"text"}
  elsif ($i eq "empty")     {"empty"}
  elsif ($i eq "singleton") {join(", ", keys %{$a}) }
  elsif ($i eq "mixed")     {delete $a->{'#PCDATA'};
-                            "mixed(".join(", ", keys %{$a}).")"}
+              if(keys %{$a}){ "mixed(".join(", ", keys %{$a}).")"}
+              else {"text"}
+      }
  elsif ($i eq "tup")       {"tup(".join(", ", keys %{$a}).")"}
  elsif ($i eq "seq")       {"seq(".join(", ", keys %{$a}).")"}
  else { my $r= "mtup(";
@@ -101,7 +195,7 @@ sub resumele{
           $r .= "$_, "  if ( $a->{$_}[0] == 1 && $a->{$_}[1] == 1 );
           $r .= "$_?, " if ( $a->{$_}[0] == 0 && $a->{$_}[1] == 1 );
           $r .= "$_*, " if ( $a->{$_}[0] == 0 && $a->{$_}[1] > 1 );
-          $r .= "$_+, " if ( $a->{$_}[0] > 0  && $a->{$_}[1] > 1 );
+          $r .= "$_+, " if ( $a->{$_}[0] >  0 && $a->{$_}[1] > 1 );
           $r .= Dumper($a) if($r =~ /\($/ );
         }
         $r =~ s/, $//;
@@ -109,33 +203,40 @@ sub resumele{
       }
 }
 
-sub join_suns{
+sub join_sons{
  my $a = shift;
- my %final = ( map { ($_ => [$a->[0]{$_}, $a->[0]{$_}])}   keys %{$a->[0]});
+ my %final = ( map { ($_ => [$a->[0]{$_}[0], $a->[0]{$_}[1]])}   
+         grep {$_ ne "_isa"} keys %{$a->[0]});
+ my %todas=();
  for (@$a){
-   for my $k (keys %{$_}){ 
+   my @novas=keys %{$_};
+   @todas{@novas}= @novas;
+   for my $k (keys %todas){ 
           next if $k =~ /_isa/;
           $final{$k}[0]=0  unless  $final{$k}[0];
-          $final{$k}[1]=$_->{$k}  if $_->{$k} > $final{$k}[1];
-          $final{$k}[0]=$_->{$k}  if $_->{$k} < $final{$k}[0];
+          unless (exists $_->{$k}){ $final{$k}[0]=0;
+                                    next} 
+          $final{$k}[1]=$_->{$k}[1]  if $_->{$k}[1] > ($final{$k}[1] || 0);
+          $final{$k}[0]=$_->{$k}[0]  if $_->{$k}[0] < $final{$k}[0];
    }
  }
  \%final
 }
 
-sub suns2str{
+sub sons2str{
  my $a = shift;
- join(' ',($a->{_isa},map { $_ . ($a->{$_}==1 ? "" : "+") } sort keys %$a));
+ join(' ',($a->{_isa},map { $_ . ($a->{$_}[0]==1 ? "" : "+") } 
+     grep {$_ ne "_isa"} sort keys %$a));
 }
 
 sub tipo{
  my $a=shift;
  for ($a){
      if(/^\s*\d+\s*$/)                      {return "_int" }
+  elsif(m{^\s*(https?|ftp|file)://\w[~&=?\w:/.-]+\s*$}i){return "_url" }
   elsif(/^\s*\d+\.\d+\s*$/)                 {return "_real" }
-  elsif(!$expand_att_id && /^\w+$/)         {return "_id" }
-  elsif(m!^(http|ftp|file)://\w[\w_:/.-]+$!){return "_url" }
-  elsif(m!^[\w.-]+\@\w[\w_:/.-]+$!)         {return "_email" }
+  elsif(/^\w+$/)                            {return "_id" }
+  elsif(m{^\s*[\w.-]+\@\w[\w_:/.-]+\s*$})   {return "_email" }
   else                                      {return undef } 
  }
 }

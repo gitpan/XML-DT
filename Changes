@@ -1,5 +1,11 @@
 Revision history for Perl extension XML::DT.
 
+0.38  Dec 24, 2004
+	- MERRY CHRISTMAS
+	- Removed Test::Pod and Test::Pod::Coverage from Makefile.PL
+	- Turned off all validation from XML::LibXML -- this way the
+	  DTD does not gets loaded and processing becomes faster
+
 0.37  Nov 21, 2004
 	- Parse correctly CDATA sections using XML::LibXML;
 
