@@ -22,6 +22,8 @@ examples/ex10.3.xml
 examples/ex10.3.pl
 examples/ex11.1.pl
 examples/ex11.1.xml
+examples/ex11.5.pl
+examples/ex11.5.xml
 examples/ex.xml
 examples/jj.dtd
 examples/makefile

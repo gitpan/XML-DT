@@ -3,9 +3,11 @@ package XML::DT;
 BEGIN{
  use XML::Parser;
  use Exporter ();
+ use vars qw($c %v $q @dtcontext @dtatributes );
  @ISA=qw(Exporter);
- @EXPORT=qw(dt dtstring inctxt ctxt mkdtskel toxml MMAPON);
- $VERSION = '0.11';
+ @EXPORT=qw(dt dtstring inctxt ctxt mkdtskel mkdtdskel toxml MMAPON $c %v $q 
+         @dtcontext @dtatributes );
+ $VERSION = '0.14';
 }
 
 =head1 NAME
@@ -33,6 +35,11 @@ BEGIN{
     inctxt('music/lyrics')
     inctxt('music.*')
 
+    ctxt(1)       /* the father element */
+
+    mkdtskel($file)
+    mkdtdskel($file)
+
 =head1 DESCRIPTION
 
 This module processes XML files with an approach similar to OMNIMARK.
@@ -54,7 +61,7 @@ The user must provide an HASH with a function for each element,
 that computes element output. Functions can use the element name C<$q>, 
 the element content C<$c> and the atribute values hash C<%v>. 
 
-All those global variables are defined in C<$main::>.
+All those global variables are defined in C<$CALLER::>.
 
 Each time an element is find the associated function is called.
 
@@ -119,15 +126,26 @@ a structured type.
 
 The following types (functors) are available:
 
-     MAP  -> makes an HASH with the sub elements; keys are the sub-element
-          names (returns a ref)
-     SEQ  -> makes an ARRAY with all the sub elements (returns a ref)
-     MULTIMAP -> makes an HASH of ARRAY; keys are the sub-element
      STR  -> concatenates all the subelements returned values (DEFAULT)
           all the subelement sould return strings to be concatenated
-     MMAPON(elementlist) -> makes an HASH with the subelements; the elements
-          contained in the elementelist, ARRAYs are created;
-          keys are the sub-element
+     SEQ  -> makes an ARRAY with all the sub elements contents; attritutes are
+          ignored (they should be processed in the subelement). (returns a ref)
+     SEQH -> makes an ARRAY of HASH with all the sub elements (returns a ref);
+          for each subelement: 
+                 -q  => element name
+                 -c  => contents
+                 at1 => at value1    for each atribute
+     MAP  -> makes an HASH with the sub elements; keys are the sub-element
+          names, values are their contents. Atributes are ignored. (they should
+          be processed in the subelement) (returns a ref)
+     MULTIMAP -> makes an HASH of ARRAY; keys are the sub-element names;
+         values are lists of contents; atributes are ignored (they should be
+         processed in the subelement); (returns a ref)
+     MMAPON(elementlist) -> makes an HASH with the subelements; 
+          keys are the sub-element names, values are their contents; 
+          atributes are ignored (they should be processed in the subelement);
+          for all the elements contained in the elementelist, it is created 
+          an ARRAY whith their contents. (returns a ref)
 
 =head2 An example:
 
@@ -135,7 +153,7 @@ The following types (functors) are available:
    %handler = ( contacts => sub{ [ split(";",$c)] },
                 -default => sub{$c},
                 -type    => { institution => 'MAP',
-                              degrees     => MMAPON('name')
+                              degrees     =>  MMAPON('name')
                               tels        => 'SEQ' }
               );
    $a = dt ("f.xml", %handler);
@@ -175,7 +193,7 @@ would make $a
                                        ' J.Ramalho' ] } };
 
 
-=head1 Skeleton generation
+=head1 DT Skeleton generation
 
 It is possible to build an initial processor program based on an example
 
@@ -185,16 +203,30 @@ Example:
 
   perl -MXML::DT -e 'mkdtskel "f.xml"' > f.pl
 
+=head1 DTD skeleton generation
+
+It makes a naife DTD based on an example(s).
+
+To do this use the function C<mkdtdskel(filename*)>.
+
+Example:
+
+  perl -MXML::DT -e 'mkdtdskel "f.xml"' > f.dtd
+
 =head1 BUGS
 
-The global variables C<$q %v $c> are defined in main. So you may have to
-write C<$::c> ... if you are outside main.
+This section is out of date...
 
 =head1 Author
 
 Jose Joao, jj@di.uminho.pt
 
   http://www.di.uminho.pt/~jj/perl/XML/
+
+thanks to 
+
+  Michel Rodriguez <mrodrigu@ieee.org>
+  José Carlos Ramanlho <jcr@di.uminho.py>
 
 =cut
 
@@ -203,10 +235,12 @@ Jose Joao, jj@di.uminho.pt
 sub dt {
   my ($file,%xml)=@_;
 
-  %ty=(%{$xml{'-type'}}, -ROOT => "NONE");
+  %ty=();
+  %ty=(%{$xml{'-type'}}) if defined($xml{'-type'}); 
+  $ty{-ROOT} = "NONE";
 
   # create a new XML::Parser instance using Tree Style
-  if ($xml{-inputenc} eq 'ISO-8859-1'){
+  if (defined($xml{-inputenc}) && ($xml{-inputenc} eq 'ISO-8859-1')){
      $parser = new XML::Parser(Style => 'Tree',
                                ErrorContext => 2 ,
                                ProtocolEncoding => 'ISO-8859-1');
@@ -222,19 +256,19 @@ sub dt {
   # Convert XML to Perl code
   $tree = $parser->parsefile($file);
 
-  if($xml{-end}){ $::c= omni("-ROOT",\%xml,@$tree); 
+  if($xml{-end}){ $c= omni("-ROOT",\%xml,@$tree); 
                   &{$xml{-end}} }
   else          { omni("-ROOT",\%xml,@$tree) }
 }
 
 sub ctxt {
-  my $level = @_[0];
-  $::dtcontext[-$level-1];
+  my $level = $_[0];
+  $dtcontext[-$level-1];
 }
 
 sub inctxt {
   my $pattern = shift ;
-  join("/",@::dtcontext) =~ m!$pattern/[^/]*$! ;
+  join("/",@dtcontext) =~ m!$pattern/[^/]*$! ;
 }
 
 sub dtstring
@@ -243,7 +277,7 @@ sub dtstring
   %ty=(%{$xml{'-type'}}, -ROOT => "NONE");
 
   # create a new XML::Parser instance using Tree Style
-  if ($xml{-inputenc} eq 'ISO-8859-1'){
+  if (defined($xml{-inputenc}) && ($xml{-inputenc} eq 'ISO-8859-1')){
      $parser = new XML::Parser(Style => 'Tree',
                                ErrorContext => 2 ,
                                ProtocolEncoding => 'ISO-8859-1');
@@ -259,7 +293,7 @@ sub dtstring
   # Convert XML to Perl code (Tree)
   $tree = $parser->parse($string);
 
-  if($xml{-end}){ $::c= omni("-ROOT",\%xml,@$tree); 
+  if($xml{-end}){ $c= omni("-ROOT",\%xml,@$tree); 
                   &{$xml{-end}} }
   else          { omni("-ROOT",\%xml,@$tree) }
 }
@@ -268,100 +302,116 @@ sub omni{
   my ($par,$xml,@l) = @_;
   my $type = $ty{$par} || "STR";
   my %typeargs=();
-  if(ref($type) EQ "mmapon"){ 
+  if(ref($type) eq "mmapon"){ 
        for(@$type){$typeargs{$_}=1;}
        $type = "MMAPON";
        };
 
   my $r ;
 
-  if( $type eq 'STR')        { $r = "" }
-  elsif( $type eq 'SEQ' or $type eq "ARRAY")     { $r = [] }
-  elsif( $type eq 'MAP' or $type eq "HASH")     { $r = {} }
-  elsif( $type eq 'MULTIMAP'){ $r = {} }
-  elsif( $type eq 'MMAPON'){ $r = {} }
-  elsif( $type eq 'NONE')    { $r = "" }
+  if( $type eq 'STR')                                 { $r = "" }
+  elsif( $type eq 'SEQ' or $type eq "ARRAY")          { $r = [] }
+  elsif( $type eq 'SEQH' or $type eq "ARRAYOFHASH")   { $r = [] }
+  elsif( $type eq 'MAP' or $type eq "HASH")           { $r = {} }
+  elsif( $type eq 'MULTIMAP')                         { $r = {} }
+  elsif( $type eq 'MMAPON' or $type eq "HASHOFARRAY") { $r = {} }
+  elsif( $type eq 'NONE')                             { $r = "" }
 
   my ($name, $val, @val,$atr, $aux);
   while( @l) {
     ($name, $val, @l) = @l;
     if ($name eq "0"){ 
       $name="-pcdata";
-      $aux= ($xml->{-outputenc} eq 'ISO-8859-1')?lat1::utf8($val): $val ;
+      $aux= (defined($xml->{-outputenc}) && $xml->{-outputenc} eq 'ISO-8859-1')
+              ?lat1::utf8($val): $val ;
       if(defined $xml->{-pcdata}) {
-         push(@main::dtcontext,"-pcdata");
-         $main::c=$aux; 
+         push(@dtcontext,"-pcdata");
+         $c=$aux; 
          $aux=&{$xml->{-pcdata}}; 
-         pop(@main::dtcontext);
+         pop(@dtcontext);
       }
     }
     else  {($atr,@val) = @$val;
-           push(@main::dtcontext,$name);
+           push(@dtcontext,$name);
+           unshift(@dtatributes,$atr);
            $aux = omniele($xml, $name, omni($name,$xml,@val), $atr);
-           pop(@main::dtcontext);
+           shift(@dtatributes);
+           pop(@dtcontext);
     }
-    if   ($type EQ "STR"){ $r .= $aux ;}
-    elsif($type EQ "SEQ" or $type EQ "ARRAY"){
+    if   ($type eq "STR"){ $r .= $aux ;}
+    elsif($type eq "SEQ" or $type eq "ARRAY"){
           push(@$r,$aux) unless whitepc($aux,$name);}
-    elsif($type EQ "MMAPON"){
+    elsif($type eq "SEQH" or $type eq "ARRAYHASH"){
+          push(@$r,{"-c" => $aux,
+                    "-q" => $name, 
+                    %$atr }) unless whitepc($aux,$name);}
+    elsif($type eq "MMAPON"){
           if(not whitepc($aux,$name)){
           if(! $typeargs{$name}) {
               warn "duplicated tag ´$name´\n" if(defined($r->{$name}));
               $r->{$name}=$aux }
           else { push(@{$r->{$name}},$aux) unless whitepc($aux,$name)}}
           }
-    elsif($type EQ "MAP" or $type EQ "HASH"){
+    elsif($type eq "MAP" or $type eq "HASH"){
           if(not whitepc($aux,$name)){
           warn "duplicated tag ´$name´\n" if(defined($r->{$name}));
           $r->{$name}=$aux }}
-    elsif($type EQ "MULTIMAP"){
+    elsif($type eq "MULTIMAP"){
           push(@{$r->{$name}},$aux) unless whitepc($aux,$name)}
-    elsif($type EQ "NONE"){ $r=$aux;}
+    elsif($type eq "NONE"){ $r=$aux;}
     else { $r="undefined type !!!"}
   }
   $r;
 }
 
-
 sub omniele {
   my $xml=shift;
   my $aux;
-  ($main::q,$main::c,$aux)=@_; 
-  %main::v=%$aux;
-  if ($xml->{-outputenc} eq 'ISO-8859-1'){
-   for (keys %::v){ $::v{$_} = lat1::utf8($::v{$_}) ; }
+  ($q,$c,$aux)=@_; 
+  %v=%$aux;
+  if (defined($xml->{-outputenc}) && $xml->{-outputenc} eq 'ISO-8859-1'){
+   for (keys %v){ $v{$_} = lat1::utf8($v{$_}) ; }
   }
 
-  if   (defined $xml->{$::q}) {&{$xml->{$::q}} }
+  if   (defined $xml->{$q}) {&{$xml->{$q}} }
   elsif(defined $xml->{'-default'}) {&{$xml->{'-default'} }}
   else {toxml();}
 }
 
-sub toxml {
-     my %at=(seqitem => "item", @_);
-     if(not ref($::c)){   "<$::q".
-             join("",map {" $_=\"$::v{$_}\""} keys %::v ) .
-             ">$::c</$::q>" }
-     elsif (ref($::c) eq "ARRAY") {   "<$::q".
-        join("",map {" $_=\"$::v{$_}\""} keys %::v ) .  ">".
-        join("",map {"<$at{seqitem}>$_</$at{seqitem}>\n" } 
-                    @{$::c} ) .
-        "</$::q>" }
-     elsif (ref($::c) eq "HASH") {   "<$::q".
-        join("",map {" $_=\"$::v{$_}\""} keys %::v ) .  ">".
-        join("",map {($_ ne "-pcdata") 
-                     ? ( (ref($::c->{$_}) eq "ARRAY")
-                         ? "<$_>". 
-                           join("</$_>\n<$_>", @{$::c->{$_}}).
-                           "</$_>\n" 
-                         : "<$_>$::c->{$_}</$_>\n" )
-                     : () } 
-                    keys %{$::c} ) .
-        "$::c->{-pcdata}</$::q>" }
+sub toxmlp {
+  my($q,$v,$c ) = @_;
+  if($q eq "-pcdata") { $c}
+  else {"<$q".  join("",map {" $_=\"$v->{$_}\""} keys %$v ) . ">$c</$q>" }
 }
 
-%mkdtskel=( '-default' => sub{$element{$::q}=1; 
-                              for (keys %::v){$att{$::q}{$_}=1 }; ""},
+sub toxml {
+     my %at=(seqitem => "item", @_);
+     if(not ref($c)){  toxmlp($q,\%v,$c)}
+     elsif (ref($c) eq "ARRAY") { 
+       if($ty{$q} eq "SEQH") {
+          toxmlp($q,{},
+             join("",map {my %a=%$_; 
+                          delete @a{"-q","-c"}; 
+                          toxmlp($_->{-q},\%a,$_->{-c}) } @{$c} )) 
+       }
+       else { toxmlp($q,\%v,
+           join("",map {"<$at{seqitem}>$_</$at{seqitem}>\n" } @{$c} ) )}
+     }
+     elsif (ref($c) eq "HASH") {   "<$q".
+        join("",map {" $_=\"$v{$_}\""} keys %v ) . ">" .
+        join("",map {($_ ne "-pcdata") 
+                     ? ( (ref($c->{$_}) eq "ARRAY")
+                         ? "<$_>". 
+                           join("</$_>\n<$_>", @{$c->{$_}}).
+                           "</$_>\n" 
+                         : "<$_>$c->{$_}</$_>\n" )
+                     : () } 
+                    keys %{$c} ) .
+        "$c->{-pcdata}</$q>" }
+}
+
+%mkdtskel=( '-default' => sub{$element{$q}=1; 
+                              for (keys %v){$att{$q}{$_}=1 }; ""},
 
              '-end' => sub{ print <<'END';
 #!/usr/bin/perl
@@ -387,6 +437,47 @@ END
             });
 
 sub mkdtskel{ dt(shift,%mkdtskel)}
+
+sub mkdtdskel {
+  my @files = @_;
+  my %handler=(
+    '-outputenc' => 'ISO-8859-1',
+    '-default'   => sub{ 
+          $elel{$q}=1;
+          $root = $q unless ctxt(1);
+          $ele{ctxt(1)}{$q} = 1;
+          for(keys(%v)){$att{$q}{$_} = 1 } ;
+        },
+    '-pcdata'    => sub{ if ($c =~ /[^ \t\n]/){ $ele{ctxt(1)}{"#PCDATA"}=1 }},
+  );
+
+  for $filename (@files){
+  dt($filename,%handler); 
+  }
+
+  print "<!-- DTD $root ... -->\n<!-- (C) ... " . `date`." -->\n";
+  delete $elel{$root};
+
+  for ($root, keys %elel){
+    putele($_);
+    for $name (keys(%{$att{$_}})) {
+       print( "\t<!-- $name : ... -->\n");
+       print( "\t<!ATTLIST $_ $name CDATA #IMPLIED >\n");
+    }
+  }
+}
+  
+sub putele {
+  my $e = shift; 
+  my @f ;
+  if($ele{$e}){
+     @f = keys %{$ele{$e}};
+     print "<!ELEMENT $e (", join("|", @f ),")", (@f == 1 ? "": "*")," >\n";
+  }
+  else {
+     print "<!ELEMENT $e  EMPTY >\n";}
+}
+
 
 sub whitepc{ $_[1] eq '-pcdata' and $_[0] =~ /^[ \t\n]*$/ };
 
