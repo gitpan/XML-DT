@@ -4,7 +4,7 @@ package XML::DT;
 
 BEGIN{
 
- use XML::LibXML;
+#XML::LIBXML# use XML::LibXML;
 #XML::PARSER# use XML::Parser;
 
  use Data::Dumper;
@@ -15,7 +15,7 @@ BEGIN{
  @ISA=qw(Exporter);
  @EXPORT=qw(dt dtstring inctxt ctxt mkdtskel mkdtdskel toxml MMAPON $c %v $q 
          @dtcontext %dtcontextcount @dtatributes pathdt pathdtstring );
- $VERSION = '0.22';
+ $VERSION = '0.23';
 }
 
 =head1 NAME
@@ -308,20 +308,20 @@ sub dt {
 
   if ($xml{-begin}){ &{$xml{-begin}} }
 
-# TODO --- how to force encoding with XML::LibXML?
-# $xml{-inputenc}
+#XML::LIBXML## TODO --- how to force encoding with XML::LibXML?
+#XML::LIBXML## $xml{-inputenc}
 
-# create a new LibXML parser
- my $parser = XML::LibXML->new();
+#XML::LIBXML## create a new LibXML parser
+#XML::LIBXML# my $parser = XML::LibXML->new();
 
-# Check if we should expand entities
-  $parser->expand_entities(1) if defined $xml{'-noexpand'} && $xml{'-noexpand'};
+#XML::LIBXML## Check if we should expand entities
+#XML::LIBXML#  $parser->expand_entities(1) if defined $xml{'-noexpand'} && $xml{'-noexpand'};
 
-# parse the file
-  my $doc = $parser->parse_file($file);
+#XML::LIBXML## parse the file
+#XML::LIBXML#  my $doc = $parser->parse_file($file);
 
-# get the document root element
-  my $tree = $doc->getDocumentElement();
+#XML::LIBXML## get the document root element
+#XML::LIBXML#  my $tree = $doc->getDocumentElement();
 
 #XML::PARSER## create a new XML::Parser instance using Tree Style
 #XML::PARSER#  if (defined($xml{-inputenc}) && ($xml{-inputenc} eq 'ISO-8859-1')){
@@ -340,11 +340,11 @@ sub dt {
 
   # execute End action if it exists
   if($xml{-end}) {
-    $c= omni("-ROOT", \%xml, $tree);
+#XML::LIBXML#    $c= omni("-ROOT", \%xml, $tree);
 #XML::PARSER#    $c= omni("-ROOT", \%xml, @$tree);
     &{$xml{-end}}
   } else {
-    omni("-ROOT",\%xml, $tree)
+#XML::LIBXML#    omni("-ROOT",\%xml, $tree)
 #XML::PARSER#    omni("-ROOT",\%xml, @$tree)
   }
 }
@@ -377,21 +377,21 @@ sub dtstring
   # execute Begin action if she exists
   if ($xml{-begin}){ &{$xml{-begin}} }
 
-# TODO --- how to force encoding with XML::LibXML?
-# $xml{-inputenc}
- $string = XML::LibXML::encodeToUTF8($xml{-inputenc},$string) if ($xml{-inputenc});
+#XML::LIBXML## TODO --- how to force encoding with XML::LibXML?
+#XML::LIBXML## $xml{-inputenc}
+#XML::LIBXML# $string = XML::LibXML::encodeToUTF8($xml{-inputenc},$string) if ($xml{-inputenc});
 
-# create a new LibXML parser
-  my $parser = XML::LibXML->new();
+#XML::LIBXML## create a new LibXML parser
+#XML::LIBXML#  my $parser = XML::LibXML->new();
 
-# Check if we should expand entities
-  $parser->expand_entities(0) if defined $xml{'-noexpand'} && $xml{'-noexpand'};
+#XML::LIBXML## Check if we should expand entities
+#XML::LIBXML#  $parser->expand_entities(0) if defined $xml{'-noexpand'} && $xml{'-noexpand'};
 
-# parse the string
-  my $doc = $parser->parse_string($string);
+#XML::LIBXML## parse the string
+#XML::LIBXML#  my $doc = $parser->parse_string($string);
 
-# get the document root element
-  my $tree = $doc->getDocumentElement();
+#XML::LIBXML## get the document root element
+#XML::LIBXML#  my $tree = $doc->getDocumentElement();
 
 #XML::PARSER## create a new XML::Parser instance using Tree Style
 #XML::PARSER#  if (defined($xml{-inputenc}) && ($xml{-inputenc} eq 'ISO-8859-1')){
@@ -410,11 +410,11 @@ sub dtstring
 
   # Check if we have a end function
   if ($xml{-end}) {
-    $c = omni("-ROOT", \%xml, $tree);
+#XML::LIBXML#    $c = omni("-ROOT", \%xml, $tree);
 #XML::PARSER#    $c = omni("-ROOT", \%xml, @$tree);
     &{$xml{-end}}
   } else { 
-    omni("-ROOT", \%xml, $tree)
+#XML::LIBXML#    omni("-ROOT", \%xml, $tree)
 #XML::PARSER#    omni("-ROOT", \%xml, @$tree)
   }
 }
@@ -570,28 +570,28 @@ sub omni{
   my ($name, $val, @val, $atr, $aux);
 
   while(@l) {
-    my $tree = shift @l;
-    $name = $tree->getName();
+#XML::LIBXML#    my $tree = shift @l;
+#XML::LIBXML#    $name = $tree->getName();
 #XML::PARSER#    ($name,$val,@l) = @l;
 
-    if (ref($tree) eq "XML::LibXML::Comment") {
+#XML::LIBXML#    if (ref($tree) eq "XML::LibXML::Comment") {
 
-      ### At the moment, treat as Text
-      ### We will need to change this, I hope!
-      $val = "";
-      $name = "-pcdata";
-      $aux= (defined($xml->{-outputenc}) && $xml->{-outputenc} eq 'ISO-8859-1')
-	?lat1::utf8($val): $val ;
-      if (defined $xml->{-pcdata}) {
-	push(@dtcontext,"-pcdata");
-	$c = $aux;
-	$aux = &{$xml->{-pcdata}};
-	pop(@dtcontext);
-      }
+#XML::LIBXML#      ### At the moment, treat as Text
+#XML::LIBXML#      ### We will need to change this, I hope!
+#XML::LIBXML#      $val = "";
+#XML::LIBXML#      $name = "-pcdata";
+#XML::LIBXML#      $aux= (defined($xml->{-outputenc}) && $xml->{-outputenc} eq 'ISO-8859-1')
+#XML::LIBXML#	?lat1::utf8($val): $val ;
+#XML::LIBXML#      if (defined $xml->{-pcdata}) {
+#XML::LIBXML#	push(@dtcontext,"-pcdata");
+#XML::LIBXML#	$c = $aux;
+#XML::LIBXML#	$aux = &{$xml->{-pcdata}};
+#XML::LIBXML#	pop(@dtcontext);
+#XML::LIBXML#      }
 
-    } elsif (ref($tree) eq "XML::LibXML::Text") {
+#XML::LIBXML#    } elsif (ref($tree) eq "XML::LibXML::Text") {
 #XML::PARSER#    if ($name eq "0") {
-      $val = $tree->getData();
+#XML::LIBXML#      $val = $tree->getData();
 
       $name = "-pcdata";
       $aux= (defined($xml->{-outputenc}) && $xml->{-outputenc} eq 'ISO-8859-1')
@@ -603,13 +603,13 @@ sub omni{
 	pop(@dtcontext);
       }
     } else {
-      my %atr = nodeAttributes($tree);
-      $atr = \%atr;
+#XML::LIBXML#      my %atr = nodeAttributes($tree);
+#XML::LIBXML#      $atr = \%atr;
 #XML::PARSER#      ($atr,@val) = @$val;
 
       push(@dtcontext,$name); $dtcontextcount{$name}++;
       unshift(@dtatributes, $atr);
-      $aux = omniele($xml, $name, omni($name, $xml, ($tree->getChildnodes())), $atr);
+#XML::LIBXML#      $aux = omniele($xml, $name, omni($name, $xml, ($tree->getChildnodes())), $atr);
 #XML::PARSER#      $aux = omniele($xml, $name, omni($name,$xml,@val), $atr);
       shift(@dtatributes);
       pop(@dtcontext); $dtcontextcount{$name}--;
@@ -620,7 +620,7 @@ sub omni{
     elsif($type eq "SEQH" or $type eq "ARRAYHASH"){
       push(@$r,{"-c" => $aux,
 		"-q" => $name,
-		nodeAttributes($tree) }) unless whitepc($aux,$name);}
+#XML::LIBXML#		nodeAttributes($tree) }) unless whitepc($aux,$name);}
 #XML::PARSER#                    %$atr }) unless whitepc($aux,$name);}
     elsif($type eq "MMAPON"){
       if(not whitepc($aux,$name)){

@@ -2,10 +2,11 @@ Changes
 t/xpath.t
 MANIFEST
 Makefile.PL
-DT.pm.in
 DT.pm
 README
 mkdtskel
+mkdtdskel
+
 examples/arq.pl
 examples/arq.xml
 examples/ex2.pl

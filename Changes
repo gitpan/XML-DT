@@ -42,5 +42,10 @@ Revision history for Perl extension xxx.
 0.21      May  27         2002
 	- choice between XML::Parser ou XML::LibXML;
 
-0.22      ...?
+0.22      Dec  20         2002
 	- added mkdtdskel as an installed script;
+	- added DT.pm as distribution file, for cpan indexation;
+
+0.23      ...
+	- removed a lot of code on Makefile.PL. Now
+	  ExtUtils::MakeMaker takes care of the full task.
