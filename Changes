@@ -19,3 +19,18 @@ Revision history for Perl extension xxx.
         - 0.15 does not work with perl 5.005 (no tr .... UC available)..
        Solution: "use bytes" if we find it.
          eval("use bytes") if ($inc{bytes.pm}) { require and import...}  
+
+0.17      Oct  30         2000
+        - added a -type => ZERO   that don't processes its subelements and
+       return "". It is good to avoid visiting certain parts of the document,
+       and for better performance.
+
+0.18      Nov  18         2000
+        - Bug fixed in dtd generator function: mkdtdskel
+        - possibility of passing parameters do toxml:
+              toxml(tag, {...atributes...}, contents)
+        - pathdt functions with path's instead of tag
+
+0.19      Nov  30         2000  - by alberto!
+        - better pathdt functions with
+              //aaa[@att='asdasd'] (see pod file)

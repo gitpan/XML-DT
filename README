@@ -135,9 +135,9 @@ SYNOPSIS gcapaper2tex.pl mypaper.xml > mupaper.tex
        'FRONT' => sub{"$c\n"},
        'AUTHOR' => sub{ push @aut, $c ; ""},
        'ABSTRACT' => sub{
-        sprintf('\author{%s}\maketitle\begin{abstract}%s\end{abstract}',
-                join ('\and', @aut) ,
-                $c) },
+          sprintf('\author{%s}\maketitle\begin{abstract}%s\end{abstract}',
+                  join ('\and', @aut) ,
+                  $c) },
        'CODE.BLOCK' => sub{"\\begin{verbatim}\n$c\\end{verbatim}\n"},
        'XREF' => sub{"\\cite{$v{REFLOC}}"},
        'LI' => sub{"\\item $c"},

@@ -1,16 +1,16 @@
 package XML::DT;
 
-
 BEGIN{
  use XML::Parser;
+ use Data::Dumper;
  use Exporter ();
  use vars qw($c %v $q @dtcontext @dtatributes );
  eval "use bytes";
- if (my $m = $INC{"bytes.pm"}) {require bytes; import bytes;}         
+ if (my $m = $INC{"bytes.pm"}) {require bytes; import bytes;}
  @ISA=qw(Exporter);
  @EXPORT=qw(dt dtstring inctxt ctxt mkdtskel mkdtdskel toxml MMAPON $c %v $q 
-         @dtcontext @dtatributes );
- $VERSION = '0.16';
+         @dtcontext @dtatributes pathdt );
+ $VERSION = '0.19';
 }
 
 =head1 NAME
@@ -52,6 +52,42 @@ Down translation function C<dt> receives a filename and a set of expressions
 
 C<dtstring> is similar but takes input from a string instead of a file.
 
+=head2 C<pathdt> function
+
+The C<pathdt> function uses a subset of XPath as key in the handler. Example:
+
+   %handler = (
+        "article/title" => sub{ toxml("h1",{},$c) },
+        "section/title" => sub{ toxml("h2",{},$c) },
+        "title"         => sub{ $c },
+        "//image[@type='jpg']" => sub{ "JPEG: <img src=\"$c\">" },
+        "//image[@type='bmp']" => sub{ "BMP: sorry, no bitmaps on the web" },
+        ...
+  )
+
+  pathdt($filename,%handler);
+
+Here are some examples of valid XPath expressions under XML::DT:
+
+  /aaa
+  /aaa/bbb
+  //ccc                           - ccc somewhere (same as "ccc")
+  /*/aaa/*
+  //*                             - same as "-default"
+  /aaa[@id]                       - aaa with an attribute id
+  /*[@*]                          - root with an attribute
+  /aaa[not(@name)]                - aaa with no attribute "name"
+  //bbb[@name='foo']              - ... attribute "name" = "foo"
+  /ccc[normalize-space(@name)='bbb']
+  //*[name()='bbb']               - complex way of saying "//bbb"
+  //*[starts-with(name(),'aa')]   - an element named "aa.*"
+  //*[contains(name(),'c')]       - an element       ".*c.*"
+  //aaa[string-length(name())=4]  -                  "...."
+  //aaa[string-length(name())&lt;4]                  ".{1,4}"
+  //aaa[string-length(name())&gt;5]                  ".{5,}"
+
+For more information, visit www.w3c.org or try a tutorial under www.zvon.org
+
 =head2 C<inctxt> function
 
 C<inctxt(pattern)> is true if the actual element path matches the provided 
@@ -76,6 +112,9 @@ interior elements return values.
 When a element has no associated function, the function associated with 
 C<-default> called. If no C<-default> function is defined the default function 
 returns a XML like string for the element.
+
+When you use C</-type> definitions, you often need do set C<-default>
+function to return just the contents: C<sub{$id}>.
 
 =head2 C<-outputenc> option
 
@@ -119,6 +158,14 @@ element C<ele1> without changing it:
              ele1 => sub { $v{at1} = "v1"; toxml(); },
            )
 
+C<toxml> can also be used with 3 arguments: tag, attrigutes and contents
+
+  toxml("a",{href=> "http://local/f.html"}, "example")
+
+returns:
+
+  <a href='http://local/f.html'>example</a>
+
 =head1 Elements with values other than strings (C<-type>)
 
 By default all elements return strings, and contents (C<$c>) is the
@@ -149,6 +196,10 @@ The following types (functors) are available:
           attributes are ignored (they should be processed in the subelement);
           for all the elements contained in the elementlist, it is created 
           an ARRAY with their contents. (returns a ref)
+     ZERO -> don't process the subelements; return ""
+
+When you use C</-type> definitions, you often need do set C<-default>
+function returning just the contents C<sub{$id}>.
 
 =head2 An example:
 
@@ -226,10 +277,12 @@ Jose Joao, jj@di.uminho.pt
 
   http://natura.di.uminho.pt/~jj/perl/XML/
 
+Alberto Simoes <albie@alfarrabio.di.uminho.pt>
+
 thanks to 
 
   Michel Rodriguez <mrodrigu@ieee.org>
-  José Carlos Ramalho <jcr@di.uminho.py>
+  José Carlos Ramalho <jcr@di.uminho.pt>
 
 =cut
 
@@ -271,6 +324,8 @@ sub ctxt {
 
 sub inctxt {
   my $pattern = shift ;
+  # see if is in root context...
+  return 1 if (($pattern eq "^" && @dtcontext==1) || $pattern eq ".*");
   join("/",@dtcontext) =~ m!$pattern/[^/]*$! ;
 }
 
@@ -301,6 +356,125 @@ sub dtstring
   else          { omni("-ROOT",\%xml,@$tree) }
 }
 
+sub pathdt{
+  my $file = shift;
+  my %h = pathtodt(@_);
+  return dt($file,%h);
+}
+
+# Testa os predicados do XPath
+sub testAttr {
+  my $atr = shift;
+  for ($atr) {
+    s/name\(\)/'$q'/g;
+    # s/\@([A-Za-z_]+)/'$v{$1}'/g;
+    s/\@([A-Za-z_]+)/defined $v{$1}?"'$v{$1}'":"''"/ge;
+    s/\@\*/keys %v?"'1'":"''"/ge;
+    if (/^not\((.*)\)$/) {
+      return ! testAttr($1);
+    } elsif (/^('|")([^\1]*)(\1)\s*=\s*('|")([^\4]*)\4$/) {
+      return ($2 eq $5);
+    } elsif (/normalize-space\((['"])([^\1)]*)\1\)/) {
+      my ($back,$forward)=($`,$');
+      my $x = normalize_space($2);
+      return testAttr("$back'$x'$forward"); 
+    } elsif (/starts-with\((['"])([^\1))]*)\1,(['"])([^\3))]*)\3\)/) {
+      my $x = starts_with($2,$4);
+      return $x;
+    } elsif (/contains\((['"])([^\1))]*)\1,(['"])([^\3))]*)\3\)/) {
+      my $x = contains($2,$4);
+      return $x; 
+    } elsif (/string-length\((['"])([^\1]*)\1\)/) {
+      my ($back,$forward) = ($`,$');
+      my $x = length($2);
+      return testAttr("$back$x$forward");
+    } elsif (/^(\d+)\s*=(\d+)$/) {
+      return ($1 == $2);
+    } elsif (/^(\d+)\s*&lt;(\d+)$/) {
+      return ($1 < $2);
+    } elsif (/^(\d+)\s*&gt;(\d+)$/) {
+      return ($1 > $2);
+    } elsif (/^(['"])([^\1]*)\1$/) {
+      return $2;
+    }
+  }
+  return 0; #$atr;
+}
+
+# Funcao auxiliar de teste de predicados do XPath
+sub starts_with {
+  my ($string,$preffix) = @_;
+  return 0 unless ($string && $preffix);
+  return 1 if ($string =~ m!^$preffix!);
+  return 0;
+}
+
+# Funcao auxiliar de teste de predicados do XPath
+sub contains {
+  my ($string,$s) = @_;
+  return 0 unless ($string && $s);
+  return 1 if ($string =~ m!$s!);
+  return 0;
+}
+
+# Funcao auxiliar de teste de predicados do XPath
+sub normalize_space {
+  my $z = shift;
+  $z =~ /^\s*(.*?)\s*$/;
+  $z = $1;
+  $z =~ s!\s+! !g;
+  return $z;
+}
+
+sub pathtodt {
+  my %h = @_;
+  my %aux=();
+  my %aux2=();
+  my %n = ();
+  my $z;
+  for $z (keys %h) {
+    if ( $z=~m{(//|/|)(.*)/([^\[]*)(?:\[(.*)\])?} ) {
+      my ($first,$second,$third,$fourth) = ($1,$2,$3,$4);
+      if (($first eq "/") && (!$second)) {
+	$first = "";
+	$second = '.*';
+	$third =~ s!\*!-default!;
+      } else {
+	$second =~ s!\*!\[^/\]\+!g;
+	$second =~ s!/$!\(/\.\*\)\?!g;
+	$second =~ s!//!\(/\.\*\)\?/!g;
+	$third =~ s!\*!-default!g;
+      }
+	push( @{$aux{$third}} , [$first,$second,$h{$z},$fourth]);
+    }
+    else                           { $aux2{$z}=$h{$z};}
+  }
+  for $z (keys %aux){
+    my $code = sub {
+         my $l;
+         for $l (@{$aux{$z}}) {
+            my $prefix = "";
+            $prefix = "^" unless (($l->[0]) or ($l->[1]));
+            $prefix = "^" if (($l->[0] eq "/") && ($l->[1]));
+            if ($l->[3]) {
+	        if(inctxt("$prefix$l->[1]") && testAttr($l->[3])) 
+                  {return &{$l->[2]}; }
+	    } else {
+	        if(inctxt("$prefix$l->[1]")) {return &{$l->[2]};}
+	    }
+         }
+       return &{ $aux2{$z}} if $aux2{$z} ;
+       return &{ $h{-default}} if $h{-default};
+       &toxml();
+    };
+    $n{$z} = $code;
+  }
+  for $z (keys %aux2){
+    $n{$z} ||= $aux2{$z} ;
+  }
+  return %n;
+}
+
 sub omni{
   my ($par,$xml,@l) = @_;
   my $type = $ty{$par} || "STR";
@@ -313,12 +487,13 @@ sub omni{
   my $r ;
 
   if( $type eq 'STR')                                 { $r = "" }
-  elsif( $type eq 'SEQ' or $type eq "ARRAY")          { $r = [] }
+  elsif( $type eq 'SEQ'  or $type eq "ARRAY")         { $r = [] }
   elsif( $type eq 'SEQH' or $type eq "ARRAYOFHASH")   { $r = [] }
-  elsif( $type eq 'MAP' or $type eq "HASH")           { $r = {} }
+  elsif( $type eq 'MAP'  or $type eq "HASH")          { $r = {} }
   elsif( $type eq 'MULTIMAP')                         { $r = {} }
   elsif( $type eq 'MMAPON' or $type eq "HASHOFARRAY") { $r = {} }
   elsif( $type eq 'NONE')                             { $r = "" }
+  elsif( $type eq 'ZERO')                             { return "" }
 
   my ($name, $val, @val,$atr, $aux);
   while( @l) {
@@ -374,7 +549,7 @@ sub omniele {
   ($q,$c,$aux)=@_; 
   %v=%$aux;
   if (defined($xml->{-outputenc}) && $xml->{-outputenc} eq 'ISO-8859-1'){
-   for (keys %v){ $v{$_} = lat1::utf8($v{$_}) ; }
+    for (keys %v){ $v{$_} = lat1::utf8($v{$_}) ; }
   }
 
   if   (defined $xml->{$q}) {&{$xml->{$q}} }
@@ -389,7 +564,8 @@ sub toxmlp {
 }
 
 sub toxml {
-     my %at=(seqitem => "item", @_);
+     if(@_ == 3){return toxmlp(@_)}
+     return "" if (defined $ty{$q} && $ty{$q} eq "ZERO");
      if(not ref($c)){  toxmlp($q,\%v,$c)}
      elsif (ref($c) eq "ARRAY") { 
        if($ty{$q} eq "SEQH") {
@@ -398,8 +574,7 @@ sub toxml {
                           delete @a{"-q","-c"}; 
                           toxmlp($_->{-q},\%a,$_->{-c}) } @{$c} )) 
        }
-       else { toxmlp($q,\%v,
-           join("",map {"<$at{seqitem}>$_</$at{seqitem}>\n" } @{$c} ) )}
+       else { toxmlp($q,\%v, join("",@{$c}))}
      }
      elsif (ref($c) eq "HASH") {   "<$q".
         join("",map {" $_=\"$v{$_}\""} keys %v ) . ">" .
@@ -476,7 +651,9 @@ sub putele {
   my @f ;
   if($ele{$e}){
      @f = keys %{$ele{$e}};
-     print "<!ELEMENT $e (", join("|", @f ),")", (@f == 1 ? "": "*")," >\n";
+     print "<!ELEMENT $e (", join("|", @f ),")", 
+           (@f == 1 && $f[0] eq "#PCDATA" ? "" : "*"),
+           " >\n";
   }
   else {
      print "<!ELEMENT $e  EMPTY >\n";}
