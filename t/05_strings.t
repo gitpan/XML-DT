@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 use XML::DT ;
-use Test::More tests => 7;
+use Test::More tests => 8;
 my $filename = "t/05_input.xml";
 
 ####
@@ -50,9 +50,24 @@ is("<?xml version=\"1.0\"?>\n<foo></foo>",$str);
 
 ###
 
-$str = dtstring("<encoding>αινσϊ</encoding>", -inputenc=>'ISO-8859-1');
-is("<encoding>αινσϊ</encoding>",$str);
-###
-$str = dtstring("<encoding>ηΗγΓ</encoding>", -outputenc=>'ISO-8859-1'
-                                            ,-inputenc=>'ISO-8859-1');
-is("<encoding>ηΗγΓ</encoding>",$str);
+{
+  no utf8;
+
+  # use Encode;
+
+  # for my $straux ("<encoding>αινσϊ</encoding>",
+  # qq{<encoding v="josι">αινη</encoding>}) {
+  # $str = dtstring($straux, -inputenc=>'ISO-8859-1');
+  # is(decode("iso-8859-1",$str),$straux);
+  # }
+
+  ###
+
+  for my $straux ("<encoding>αινσϊ</encoding>",
+		  qq{<encoding v="josι">αινσϊ</encoding>},
+		  "<encoding>ηΗγΓ</encoding>") {
+    $str = dtstring($straux, -outputenc=>'ISO-8859-1', -inputenc=>'ISO-8859-1');
+    is($str,$straux);
+  }
+
+}

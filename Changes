@@ -1,5 +1,9 @@
 Revision history for Perl extension XML::DT.
 
+0.30  Jan 22, 2004
+	- Bugs corrected with encodings in attributes
+	- Corrected encoding with utf8 locale -- we hope :-(;
+
 0.29  Jan 07, 2004
 	- Corrected bug with encodings.
 	- Added test for dtstring and encoding;
