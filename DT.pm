@@ -21,7 +21,7 @@ BEGIN {
 	     &MMAPON $c %v $q &xmltree &pathdturl
 	     @dtcontext %dtcontextcount @dtatributes &pathdt &pathdtstring );
 
-  $VERSION = '0.32';
+  $VERSION = '0.33';
   #XML::LIBXML# $PARSER = 'XML::LibXML';
   #XML::PARSER# $PARSER = 'XML::Parser';
 
@@ -259,6 +259,10 @@ processed as a structured type.
 The following types (functors) are available:
 
 =over 4
+
+=item ID
+
+returns the contents. Very similar to C<<sub{$c}>>
 
 =item STR
 
@@ -746,6 +750,7 @@ sub _omni{
   my $r ;
 
   if( $type eq 'STR')                                 { $r = "" }
+  elsif( $type eq 'ID')                               { $r = 0  }
   elsif( $type eq 'SEQ'  or $type eq "ARRAY")         { $r = [] }
   elsif( $type eq 'SEQH' or $type eq "ARRAYOFHASH")   { $r = [] }
   elsif( $type eq 'MAP'  or $type eq "HASH")          { $r = {} }
@@ -815,6 +820,8 @@ sub _omni{
       pop(@dtcontext); $dtcontextcount{$name}--;
     }
     if    ($type eq "STR"){ if (defined($aux)) {$r .= $aux} ;}
+    elsif ($type eq "ID"){
+      $r = $aux unless _whitepc($aux, $name); }
     elsif ($type eq "SEQ" or $type eq "ARRAY"){
       push(@$r, $aux) unless _whitepc($aux, $name);}
     elsif ($type eq "SEQH" or $type eq "ARRAYHASH"){

@@ -1,5 +1,8 @@
 Revision history for Perl extension XML::DT.
 
+0.33  Oct 03, 2004
+	- Added ID type;
+
 0.32  Sep 20, 2004
 	- Added missing documentation;
 	- Added pod and pod-coverage tests;
