@@ -1,6 +1,6 @@
 # -*- cperl -*-
 
-use Test::More tests => 10;
+use Test::More tests => 12;
 use XML::DT;
 ok(1);
 
@@ -17,6 +17,9 @@ is(toxml("a",{},""), "<a></a>");
 is(toxml("a",{},"c"), "<a>c</a>");
 is(toxml("a",{a=>1},"c"), "<a a=\"1\">c</a>");
 
+# this is one of the most important tests for MathML
+is(toxml("foo",{},"0"), "<foo>0</foo>");
+
 # toxml with variables
 $q = "a";
 $c = "b";
@@ -25,3 +28,6 @@ is(toxml, "<a>b</a>");
 
 $v{foo} = "bar";
 is(toxml, "<a foo=\"bar\">b</a>");
+
+$c = '0';
+is(toxml, "<a foo=\"bar\">0</a>");

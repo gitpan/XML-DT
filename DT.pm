@@ -17,7 +17,7 @@ BEGIN{
  @EXPORT=qw(&dt &dtstring &dturl &inctxt &ctxt &mkdtskel &mkdtdskel &toxml 
          &MMAPON $c %v $q &xmltree &pathdturl
          @dtcontext %dtcontextcount @dtatributes &pathdt &pathdtstring );
- $VERSION = '0.25';
+ $VERSION = '0.26';
 }
 
 =head1 NAME
@@ -680,7 +680,7 @@ sub omni{
 #XML::LIBXML#      $val = $tree->getData();
 #XML::LIBXML#      $aux= (defined($xml->{-outputenc}) && $xml->{-outputenc} eq 'ISO-8859-1')
 #XML::LIBXML#	            ?lat1::utf8($val): $val ;
-#XML::LIBXML#      if (defined $xml->{-pcdata}) {
+#XML::LIBXML#      if (defined($xml->{-pcdata})) {
 #XML::LIBXML#	      push(@dtcontext,"-pcdata");
 #XML::LIBXML#	      $c = $aux;
 #XML::LIBXML#	      $aux = &{$xml->{-pcdata}};
@@ -699,7 +699,7 @@ sub omni{
 #XML::LIBXML#      $name = "-pcdata";
 #XML::LIBXML#      $aux= (defined($xml->{-outputenc}) && $xml->{-outputenc} eq 'ISO-8859-1')
 #XML::LIBXML#	?lat1::utf8($val): $val ;
-#XML::LIBXML#      if (defined $xml->{-pcdata}) {
+#XML::LIBXML#      if (defined($xml->{-pcdata})) {
 #XML::LIBXML#	push(@dtcontext,"-pcdata");
 #XML::LIBXML#	$c = $aux;
 #XML::LIBXML#	$aux = &{$xml->{-pcdata}};
@@ -713,7 +713,7 @@ sub omni{
       $name = "-pcdata";
       $aux= (defined($xml->{-outputenc}) && $xml->{-outputenc} eq 'ISO-8859-1')
 	?lat1::utf8($val): $val ;
-      if (defined $xml->{-pcdata}) {
+      if (defined($xml->{-pcdata})) {
 	push(@dtcontext,"-pcdata");
 	$c = $aux;
 	$aux = &{$xml->{-pcdata}};
@@ -731,7 +731,7 @@ sub omni{
       shift(@dtatributes);
       pop(@dtcontext); $dtcontextcount{$name}--;
     }
-    if   ($type eq "STR"){ if ($aux) {$r .= $aux} ;}
+    if   ($type eq "STR"){ if (defined($aux)) {$r .= $aux} ;}
     elsif($type eq "SEQ" or $type eq "ARRAY"){
       push(@$r, $aux) unless whitepc($aux, $name);}
     elsif($type eq "SEQH" or $type eq "ARRAYHASH"){
@@ -800,13 +800,14 @@ sub toxml {
     if ($q eq "-pcdata") {
       return $c
     }
-    openTag($q,$v) . "$c</$q>"
+    return openTag($q,$v) . "$c</$q>"
   }
   elsif (ref($c) eq "HASH" && $c->{'-q'} && $c->{'-c'}) {
     my %a = %$c;
     my ($q,$c) = delete @a{"-q","-c"};
     toxml($q,\%a,$c);
-  } elsif (ref($c) eq "HASH") {
+  }
+  elsif (ref($c) eq "HASH") {
     openTag($q,$v).
       join("",map {($_ ne "-pcdata")
 		     ? ( (ref($c->{$_}) eq "ARRAY")

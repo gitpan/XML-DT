@@ -1,8 +1,12 @@
 Revision history for Perl extension XML::DT.
 
+0.26  Oct 12, 2003
+	- Corrected makefile so that it detects if it should use perl
+	  5.8.0 or 5.8.1 PM_FILTER syntax;
+	- Fixed bug with tags with only a '0' inside;
+
 0.25  Oct 08, 2003
-	- Thanks to Martin Mokrejs, detected too many bugs with perl 5.8.1,
-and now it is REQUIRED!
+	- Thanks to Martin Mokrejs, detected too many bugs with perl 5.8.1.
 
 0.24.1 Jun 17, 2003
 	- corrected problem when using a prefix on Makefile.PL 

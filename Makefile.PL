@@ -34,7 +34,7 @@ my $pattern = uc($XML);
 
 #### --- now, construct PM_FILTER
 $PM_FILTER = qq(perl -npe \\"s/\\#$pattern\\#//;\\");
-if ($^V > v5.8.0) {
+if ($^V gt v5.8.0) {
   $PM_FILTER = qq(perl -npe \"s/\\#$pattern\\#//;\");
 }
 
