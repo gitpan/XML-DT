@@ -3,9 +3,7 @@ MANIFEST
 Makefile.PL
 test.pl
 DT.pm
-DT.html
 README
-XML-DT.readme.html
 mkdtskel
 examples/arq.pl
 examples/arq.xml
@@ -33,7 +31,6 @@ examples/10nov.sgm
 examples/pub.pl
 examples/publico.dtd
 examples/gcapaper2tex.pl
-xmldt.html
 examples/XPath/ex1.pl
 examples/XPath/ex1.xml
 examples/XPath/ex2.pl
@@ -50,3 +47,5 @@ examples/XPath/ex7.pl
 examples/XPath/ex7.xml
 examples/XPath/ex8.pl
 examples/XPath/ex8.xml
+examples/XPath/ex8.xml
+examples/makenewexample

@@ -4,13 +4,13 @@ BEGIN{
  use XML::Parser;
  use Data::Dumper;
  use Exporter ();
- use vars qw($c %v $q @dtcontext @dtatributes );
+ use vars qw($c %v $q @dtcontext %dtcontextcount @dtatributes );
  eval "use bytes";
  if (my $m = $INC{"bytes.pm"}) {require bytes; import bytes;}
  @ISA=qw(Exporter);
  @EXPORT=qw(dt dtstring inctxt ctxt mkdtskel mkdtdskel toxml MMAPON $c %v $q 
-         @dtcontext @dtatributes pathdt );
- $VERSION = '0.19';
+         @dtcontext %dtcontextcount @dtatributes pathdt pathdtstring );
+ $VERSION = '0.20';
 }
 
 =head1 NAME
@@ -271,18 +271,21 @@ Example:
 
 This section is out of date...
 
-=head1 Author
+=head1 AUTHORS
 
-Jose Joao, jj@di.uminho.pt
+Home for XML::DT;
 
   http://natura.di.uminho.pt/~jj/perl/XML/
 
-Alberto Simoes <albie@alfarrabio.di.uminho.pt>
+Jose Joao, <jj@di.uminho.pt>
 
-thanks to 
+Alberto Manuel Simões, <albie@alfarrabio.di.uminho.pt>
+
+thanks to
 
   Michel Rodriguez <mrodrigu@ieee.org>
   José Carlos Ramalho <jcr@di.uminho.pt>
+  Mark A. Hillebrand
 
 =cut
 
@@ -306,12 +309,13 @@ sub dt {
                                   );
   }
 
-  #execute Begin action if she exists
+  # execute Begin action if it exists
   if ($xml{-begin}){ &{$xml{-begin}} }
 
   # Convert XML to Perl code
   $tree = $parser->parsefile($file);
 
+  # execute End action if it exists
   if($xml{-end}){ $c= omni("-ROOT",\%xml,@$tree); 
                   &{$xml{-end}} }
   else          { omni("-ROOT",\%xml,@$tree) }
@@ -327,6 +331,13 @@ sub inctxt {
   # see if is in root context...
   return 1 if (($pattern eq "^" && @dtcontext==1) || $pattern eq ".*");
   join("/",@dtcontext) =~ m!$pattern/[^/]*$! ;
+}
+
+
+sub pathdtstring{
+  my $string = shift;
+  my %h = pathtodt(@_);
+  return dtstring($string,%h);
 }
 
 sub dtstring
@@ -433,7 +444,14 @@ sub pathtodt {
   my %n = ();
   my $z;
   for $z (keys %h) {
-    if ( $z=~m{(//|/|)(.*)/([^\[]*)(?:\[(.*)\])?} ) {
+	# TODO - Make it more generic
+	if ( $z=~m{\w+(\|\w+)+}) {
+		my @tags = split /\|/, $z;
+		for(@tags) {
+			$aux2{$_}=$h{$z}
+		}
+	}
+    elsif ( $z=~m{(//|/|)(.*)/([^\[]*)(?:\[(.*)\])?} ) {
       my ($first,$second,$third,$fourth) = ($1,$2,$3,$4);
       if (($first eq "/") && (!$second)) {
 	$first = "";
@@ -510,11 +528,11 @@ sub omni{
       }
     }
     else  {($atr,@val) = @$val;
-           push(@dtcontext,$name);
+           push(@dtcontext,$name);$dtcontextcount{$name}++;
            unshift(@dtatributes,$atr);
            $aux = omniele($xml, $name, omni($name,$xml,@val), $atr);
            shift(@dtatributes);
-           pop(@dtcontext);
+           pop(@dtcontext);$dtcontextcount{$name}--;
     }
     if   ($type eq "STR"){ $r .= $aux ;}
     elsif($type eq "SEQ" or $type eq "ARRAY"){

@@ -5,6 +5,7 @@ use ExtUtils::MakeMaker;
 
 @extras= (
           ABSTRACT_FROM => 'DT.pm',
+	  EXE_FILES => ["mkdtskel"],
           AUTHOR        => 'Jose Joao (jj@di.uminho.pt)');
 
 WriteMakefile(

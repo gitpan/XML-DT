@@ -31,6 +31,11 @@ Revision history for Perl extension xxx.
               toxml(tag, {...atributes...}, contents)
         - pathdt functions with path's instead of tag
 
-0.19      Nov  30         2000  - by alberto!
+0.19      Nov  30         2000
         - better pathdt functions with
               //aaa[@att='asdasd'] (see pod file)
+
+0.20      ...  ..         2001
+	- installs mkdtskel shell script to be used quickly
+	- removed html files from package. User can do that with pod2html
+
