@@ -33,7 +33,7 @@ WriteMakefile(
 	      'NAME'         => 'XML::DT',
 	      'VERSION_FROM' => 'DT.pm',
 	      'clean'        => { FILES => "DT.pm"},
-	      'EXE_FILES'    => [ "mkdtskel" ],
+	      'EXE_FILES'    => [ "mkdtskel", "mkdtdskel" ],
 );
 
 sub MY::postamble {

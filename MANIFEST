@@ -3,6 +3,7 @@ t/xpath.t
 MANIFEST
 Makefile.PL
 DT.pm.in
+DT.pm
 README
 mkdtskel
 examples/arq.pl

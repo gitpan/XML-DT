@@ -42,4 +42,5 @@ Revision history for Perl extension xxx.
 0.21      May  27         2002
 	- choice between XML::Parser ou XML::LibXML;
 
-
+0.22      ...?
+	- added mkdtdskel as an installed script;
