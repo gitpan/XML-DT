@@ -22,7 +22,7 @@ BEGIN {
 	     &MMAPON $c %v $q &xmltree &pathdturl
 	     @dtcontext %dtcontextcount @dtatributes @dtattributes &pathdt &pathdtstring );
 
-  $VERSION = '0.39';
+  $VERSION = '0.40';
   #XML::LIBXML# $PARSER = 'XML::LibXML';
   #XML::PARSER# $PARSER = 'XML::Parser';
 
@@ -763,7 +763,8 @@ sub _pathtodt {
 
 sub _omni{
   my ($par, $xml, @l) = @_;
-  my $type = $ty{$par} || "STR";
+  my $defaulttype = (exists($xml->{-type}) && exists($xml->{-type}{-default}))?$xml->{-type}{-default}:"STR";
+  my $type = $ty{$par} || $defaulttype;
   my %typeargs = ();
 
   if (ref($type) eq "mmapon") {
@@ -913,30 +914,18 @@ sub _omniele {
 
 
 
-sub xmltree {
-  +{'-c' => $c, '-q' => $q, %v}
-}
-
-
-# está a ser usada pela toxml1, que não é usada :-)
-
-# sub toxmlp {
-#   my ($q,$v,$c ) = @_;
-#   if ($q eq "-pcdata") { $c }
-#   else {"<$q" . join("",map {" $_=\"$v->{$_}\""} keys %$v ) . ">$c</$q>" }
-# }
-
+sub xmltree { +{'-c' => $c, '-q' => $q, %v} }
 
 
 sub toxml {
   my ($q,$v,$c);
 
   if (not @_) {
-    ($q,$v,$c) = ($XML::DT::q, \%XML::DT::v, $XML::DT::c);
+    ($q, $v, $c) = ($XML::DT::q, \%XML::DT::v, $XML::DT::c);
   } elsif (ref($_[0])) {
     $c = shift;
   } else {
-    ($q,$v,$c) = @_;
+    ($q, $v, $c) = @_;
   }
 
   if (not ref($c)) {
@@ -951,7 +940,9 @@ sub toxml {
   elsif (ref($c) eq "HASH" && $c->{'-q'} && $c->{'-c'}) {
     my %a = %$c;
     my ($q,$c) = delete @a{"-q","-c"};
-    toxml($q,\%a,$c);
+    ###   _openTag($q,\%a).toxml($c).).
+    ###   toxml($q,\%a,join("\n",map {toxml($_)} @$c))
+    toxml($q,\%a,(ref($c)?toxml($c):$c));
   }
   elsif (ref($c) eq "HASH") {
     _openTag($q,$v).
@@ -965,8 +956,13 @@ sub toxml {
 	   keys %{$c} ) .
 	     "$c->{-pcdata}</$q>" } ########  "NOTYetREady"
   elsif (ref($c) eq "ARRAY") {
-    if($ty{$q} eq "SEQH"){toxml($q,$v,join("\n",map {toxml($_)} @$c))}
-    else                 {toxml($q,$v,join("",@{$c}))}
+    if (defined($q) && exists($ty{$q}) && $ty{$q} eq "SEQH") {
+      toxml($q,$v,join("\n",map {toxml($_)} @$c))
+    } elsif (defined $q) {
+      toxml($q,$v,join("",@{$c}))
+    } else {
+      join("\n",map {(ref($_)?toxml($_):$_)} @$c)
+    }
   }
 }
 
@@ -978,37 +974,6 @@ sub _openTag{
 sub _emptyTag{
   "<$_[0]". join("",map {" $_=\"$_[1]{$_}\""} keys %{$_[1]} )."/>"
 }
-
-
-
-# toxml1 is not being used.
-
-# sub toxml1 {
-#   if(@_ == 3){return toxmlp(@_)}
-#   return "" if (defined $ty{$q} && $ty{$q} eq "ZERO");
-#   if(not ref($c)){  toxmlp($q,\%v,$c)}
-#   elsif (ref($c) eq "ARRAY") {
-#     if($ty{$q} eq "SEQH") {
-#       toxmlp($q,{},
-# 	     join("",map {my %a=%$_; 
-# 			  delete @a{"-q","-c"}; 
-# 			  toxmlp($_->{'-q'},\%a,$_->{-c}) } @{$c} ))
-#     }
-#     else { toxmlp($q,\%v, join("",@{$c}))}
-#   }
-#   elsif (ref($c) eq "HASH") {
-#     "<$q".
-#       join("",map {" $_=\"$v{$_}\""} keys %v ) . ">" .
-# 	join("",map {($_ ne "-pcdata")
-# 		       ? ( (ref($c->{$_}) eq "ARRAY")
-# 			   ? "<$_>".
-# 			   join("</$_>\n<$_>", @{$c->{$_}}).
-# 			   "</$_>\n"
-# 			   : "<$_>$c->{$_}</$_>\n" )
-# 			 : () }
-# 	     keys %{$c} ) .
-# 	       "$c->{-pcdata}</$q>" }
-# }
 
 
 sub mkdtskel_fromDTD {

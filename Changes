@@ -1,5 +1,10 @@
 Revision history for Perl extension XML::DT.
 
+0.40  Apr 06, 2005
+	- Added default type directive
+	- Added tests for type-based XML processing;
+	- Fixed recursive toxml;
+
 0.39  Mar 22, 2005
 	- Added open '-ignorecase' to look to tag names and attributes
 	  as the same although they differ in case

@@ -1,8 +1,10 @@
 # -*- cperl -*-
 
-use Test::More tests => 12;
-use XML::DT;
-ok(1);
+use Test::More tests => 16;
+
+BEGIN {
+  use_ok( 'XML::DT' );
+}
 
 # normalize_space
 is(XML::DT::_normalize_space("  teste  "), "teste");
@@ -16,6 +18,42 @@ is(XML::DT::_normalize_space(" spaces   in   \t the middle\t"),
 is(toxml("a",{},""), "<a/>");
 is(toxml("a",{},"c"), "<a>c</a>");
 is(toxml("a",{a=>1},"c"), "<a a=\"1\">c</a>");
+is(toxml({ -q => "html",
+           -c => { -q => "head",
+                   -c => { -q => "title",
+                           -c => "Titulo da pagina" }}}),
+   "<html><head><title>Titulo da pagina</title></head></html>");
+
+
+is(toxml({ -q => "html",
+           -c => { -q => "head",
+                   -c => []
+		 }
+	 }),   "<html><head/></html>");
+
+
+is(toxml({ -q => "html",
+           -c => { -q => "head",
+                   -c => [ { -q => "title",
+                             -c => "Titulo da pagina" },
+			   { -q => "title",
+                             -c => "Titulo da pagina" }]}}),
+   "<html><head><title>Titulo da pagina</title>\n<title>Titulo da pagina</title></head></html>");
+
+
+is(toxml({ -q => "html",
+           -c => [ { -q => "head",
+                     -c => [ { -q => "title",
+                               -c => "Titulo da pagina" },
+			     { -q => "title",
+                               -c => "Titulo da pagina" }]},
+		   { -q => "head",
+                     -c => [ { -q => "title",
+                               -c => "Titulo da pagina" },
+			     { -q => "title",
+                               -c => "Titulo da pagina" }]}]}),
+   "<html><head><title>Titulo da pagina</title>\n<title>Titulo da pagina</title></head>\n<head><title>Titulo da pagina</title>\n<title>Titulo da pagina</title></head></html>");
+
 
 # this is one of the most important tests for MathML
 is(toxml("foo",{},"0"), "<foo>0</foo>");

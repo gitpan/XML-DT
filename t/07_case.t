@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 use XML::DT ;
 use Test::More tests => 8;
-my $filename = "t/07.case.xml";
+my $filename = "t/07_case.xml";
 
 ####
 
