@@ -1,7 +1,13 @@
 Revision history for Perl extension XML::DT.
 
-0.25  Nov 15, 2004
-	- Added -dtd support to mkdtdskel (now we need XML::DTDParser)
+0.36  Nov 19, 2004
+	- Added support for bad HTML documents;
+	- Added test for -dtd support of mkdtskel;
+	- Moved mkdtskel code to main module;
+	- Changed default format for mkdtskel;
+
+0.35  Nov 15, 2004
+	- Added -dtd support to mkdtskel (now we need XML::DTDParser)
 
 0.34  Oct 30, 2004
 	- corrected '@dtattributes' instead of '@dtatributes'

@@ -9,77 +9,13 @@ my $filename = shift;
 $dtd = 1 if ($filename =~ m!\.dtd$!);
 
 if ($dtd) {
-  my $file = ParseDTDFile($filename);
+  mkdtskel_fromDTD ($filename, @ARGV);
 
-  print <<'PERL';
-#!/usr/bin/perl -w
-use XML::DT;
-
-my $filename = shift;
-my %handler = (
-PERL
-
-
-  for (keys %{$file}) {
-    print "\t'$_' => sub {\n";
-    print "\t\t#remember ", 
-      join(", ", map { "\$v{$_}" } keys %{$file->{$_}{attributes}}), "\n" if exists($file->{$_}{attributes});
-    print "\t},\n";
-  }
-
-
-  print <<'PERL';
-);
-
-print dt($filename, %handler);
-PERL
-
-
-### OLD WAY
-#   $/ = ">";
-#   while(<>) {
-#     s/\n/ /g;
-#     s// /g;
-#     s/^\s*//;
-#     if (m/<!ELEMENT\s+([A-Za-z_-]+)/) {
-#       $elem{$1} = [];
-#     } elsif (m/<!ATTLIST\s+([A-Za-z_-]+)\s+(.*)\s*>/) {
-#       my $elem = $1;
-#       my $fields = $2;
-#       while($fields =~ m!([A-Za-z_-]+)+.*?#(REQUIRED|IMPLIED)\s*!g) {
-# 	push @{$elem{$elem}}, $1;
-#       }
-#     } else {
-#       #print STDERR "Ignoring $_\n";
-#       #---
-#     }
-#   }
-
-#   print <<'EOH';
-# #!/usr/bin/perl -w
-# use XML::DT;
-
-
-# my %handler = (
-# EOH
-
-#   for (keys %elem) {
-#     print "\t'$_' => sub {},";
-#     print " #remember ",join(", ",map {"'$_'"} @{$elem{$_}}) if @{$elem{$_}};
-#     print "\n";
-#   }
-
-#   print <<'EOH';
-# );
-# print dt($filename, %handler);
-# EOH
+} elsif ($html) {
+  mkdtskel ("-html", $filename, @ARGV);
 
 } else {
-  if ($html) {
-    mkdtskel ("-html", $filename, @ARGV);
-  } else {
-    mkdtskel ($filename, @ARGV);
-  }
+  mkdtskel ($filename, @ARGV);
 }
 
 __END__
@@ -107,4 +43,18 @@ on the generated file to remember the programmer.
 
 XML::DT(1), mkdtdskel(1) and perl(1)
 
+=head1 AUTHORS
+
+Jose Joao Almeida, <jj@di.uminho.pt>
+
+Alberto Manuel Simões, <albie@alfarrabio.di.uminho.pt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 1999-2004 by Projecto Natura
+
+This library is free software; you can redistribute it
+and/or modify it under the same terms as Perl itself.
+
 =cut
+

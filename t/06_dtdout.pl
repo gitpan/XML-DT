@@ -11,8 +11,9 @@ my $filename = shift;
 %handler=(
 #    '-outputenc' => 'ISO-8859-1',
 #    '-default'   => sub{"<$q>$c</$q>"},
-     'a' => sub{ }, # 1 occurrences;
-     'b' => sub{ }, # 3 occurrences; attributes: title
-     'c' => sub{ }, # 6 occurrences; attributes: title
+     'a' => sub { },
+     'b' => sub { }, # attributes: title
+     'c' => sub { }, # attributes: title
 );
+
 print dt($filename,%handler);

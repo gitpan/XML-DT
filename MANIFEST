@@ -60,3 +60,5 @@ t/06_output.pl
 META.yml                                 Module meta-data (added by MakeMaker)
 t/pod-coverage.t
 t/pod.t
+t/06_input.dtd
+t/06_dtdout.pl

@@ -9,6 +9,7 @@ BEGIN {
 
   use Data::Dumper;
   use LWP::Simple;
+  use XML::DTDParser "ParseDTDFile";
   use Exporter ();
   use vars qw($c %v $q @dtcontext %dtcontextcount @dtatributes @dtattributes );
 
@@ -17,11 +18,11 @@ BEGIN {
   #if (my $m = $INC{"bytes.pm"}) {require bytes; import bytes;}
 
   @ISA=qw(Exporter);
-  @EXPORT=qw(&dt &dtstring &dturl &inctxt &ctxt &mkdtskel &mkdtdskel &toxml
+  @EXPORT=qw(&dt &dtstring &dturl &inctxt &ctxt &mkdtskel &mkdtskel_fromDTD &mkdtdskel &toxml
 	     &MMAPON $c %v $q &xmltree &pathdturl
 	     @dtcontext %dtcontextcount @dtatributes @dtattributes &pathdt &pathdtstring );
 
-  $VERSION = '0.35';
+  $VERSION = '0.36';
   #XML::LIBXML# $PARSER = 'XML::LibXML';
   #XML::PARSER# $PARSER = 'XML::Parser';
 
@@ -171,12 +172,20 @@ The function C<toxml> understands this structure and makes XML with it.
 =head2 mkdtskel
 
 Used by the mkdtskel script to generate automatically a XML::DT perl
-script file based on an XML file. Check C<mkdtskel> for details.
+script file based on an XML file. Check C<mkdtskel> manpage for
+details.
+
+=head2 mkdtskel_fromDTD
+
+Used by the mkdtskel script to generate automatically a XML::DT perl
+script file based on an DTD file. Check C<mkdtskel> manpage for
+details.
 
 =head2 mkdtdskel
 
 Used by the mkdtskel script to generate automatically a XML::DT perl
-script file based on a DTD file. Check C<mkdtdskel> for details.
+script file based on a DTD file. Check C<mkdtdskel> manpage for
+details.
 
 =head1 Accessing parents
 
@@ -409,6 +418,13 @@ Michel Rodriguez    <mrodrigu@ieee.org>
 José Carlos Ramalho <jcr@di.uminho.pt>
 Mark A. Hillebrand
 
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 1999-2004 by Projecto Natura
+
+This library is free software; you can redistribute it
+and/or modify it under the same terms as Perl itself.
+
 =cut
 
 
@@ -448,8 +464,10 @@ sub dt {
   #XML::LIBXML## parse the file
   #XML::LIBXML#  my $doc;
   #XML::LIBXML#  if    ( $xml{'-html'}) {
-  #XML::LIBXML#    eval{$doc = $parser->parse_html_file($file);};
-  #XML::LIBXML#    if ($@) {warn("Erro: $@\n"); } #{return undef; }
+  #XML::LIBXML#     $parser->recover(1);
+  #XML::LIBXML#     eval{$doc = $parser->parse_html_file($file);};
+  #XML::LIBXML##    if ($@) {warn("Erro: $@\n"); } #{return undef; }
+  #XML::LIBXML#     return undef if !$doc;
   #XML::LIBXML#  }
   #XML::LIBXML#  else{ $doc = $parser->parse_file($file)  }
 
@@ -565,8 +583,10 @@ sub dtstring {
 
   #XML::LIBXML#  $doc = $parser->parse_string($string)      unless( $xml{'-html'});
   #XML::LIBXML#  if ( $xml{'-html'}) {
+  #XML::LIBXML#    $parser->recover(1);
   #XML::LIBXML#    eval{$doc = $parser->parse_html_string($string);};
-  #XML::LIBXML#    if ($@) { return undef; }
+  #XML::LIBXML##    if ($@) { return undef; }
+  #XML::LIBXML#     return undef unless defined $doc;
   #XML::LIBXML#  }
 
   #XML::LIBXML## get the document root element
@@ -975,6 +995,43 @@ sub _openTag{
 # }
 
 
+sub mkdtskel_fromDTD {
+  my $filename = shift;
+  my $file = ParseDTDFile($filename);
+
+  print <<'PERL';
+#!/usr/bin/perl
+use XML::DT ;
+my $filename = shift;
+
+# Variable Reference
+#
+# $c - contents after child processing
+# $q - element name (tag)
+# %v - hash of attributes
+
+%handler=(
+#    '-outputenc' => 'ISO-8859-1',
+#    '-default'   => sub{"<$q>$c</$q>"},
+PERL
+
+
+  for (sort keys %{$file}) {
+    print "     '$_' => sub { },";
+    print " # attributes: ",
+      join(", ", keys %{$file->{$_}{attributes}}) if exists($file->{$_}{attributes});
+    print "\n";
+  }
+
+
+  print <<'PERL';
+);
+
+print dt($filename,%handler);
+PERL
+
+}
+
 sub mkdtskel{
   my @files = @_;
   my %mkdtskel =
@@ -991,17 +1048,23 @@ sub mkdtskel{
 use XML::DT ;
 my $filename = shift;
 
+# Variable Reference
+#
+# $c - contents after child processing
+# $q - element name (tag)
+# %v - hash of attributes
+
 %handler=(
 #    '-outputenc' => 'ISO-8859-1',
 #    '-default'   => sub{"<$q>$c</$q>"},
 END
        for $name (sort keys %element) {
-	 print "     '$name' => sub{\n";
-	 print( '       # remember attributes $v{', 
-		join('},$v{',keys %{$att{$name}}), "}\n")  if ($att{$name});
-	 print "       # occurred $element{$name} times\n";
-	 print "       \"\$q:\$c\"\n";
-	 print "     },\n";
+	 print "     '$name' => sub{ }, #";
+	 print " $element{$name} occurrences;";
+	 print ' attributes: ',
+	   join(', ', keys %{$att{$name}}) if $att{$name};
+#	 print "       \"\$q:\$c\"\n";
+	 print "\n";
        }
        print <<'END';
 );
