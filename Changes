@@ -1,5 +1,8 @@
 Revision history for Perl extension XML::DT.
 
+0.41  Jul 20, 2005
+	- Removed warning from HTML parsing;
+
 0.40  Apr 06, 2005
 	- Added default type directive
 	- Added tests for type-based XML processing;

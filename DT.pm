@@ -22,7 +22,7 @@ BEGIN {
 	     &MMAPON $c %v $q &xmltree &pathdturl
 	     @dtcontext %dtcontextcount @dtatributes @dtattributes &pathdt &pathdtstring );
 
-  $VERSION = '0.40';
+  $VERSION = '0.41';
   #XML::LIBXML# $PARSER = 'XML::LibXML';
   #XML::PARSER# $PARSER = 'XML::Parser';
 
@@ -456,7 +456,6 @@ sub dt {
   #XML::LIBXML## create a new LibXML parser
   #XML::LIBXML# my $parser = XML::LibXML->new();
 
-
   #### We don't wan't DT to load everytime the DTD (I Think!)
   #XML::LIBXML# $parser->validation(0);
   #XML::LIBXML# $parser->expand_xinclude(0);  # testing
@@ -467,7 +466,12 @@ sub dt {
   #XML::LIBXML#  my $doc;
   #XML::LIBXML#  if    ( $xml{'-html'}) {
   #XML::LIBXML#     $parser->recover(1);
-  #XML::LIBXML#     eval{$doc = $parser->parse_html_file($file);};
+  #XML::LIBXML##    $parser->recover_silently(1);
+
+  #XML::LIBXML#     eval{
+  #XML::LIBXML#       local $SIG{__WARN__} = sub{};
+  #XML::LIBXML#       $doc = $parser->parse_html_file($file);
+  #XML::LIBXML#     };
   #XML::LIBXML##    if ($@) {warn("Erro: $@\n"); } #{return undef; }
   #XML::LIBXML#     return undef if !$doc;
   #XML::LIBXML#  }
@@ -583,7 +587,10 @@ sub dtstring {
   #XML::LIBXML#  $doc = $parser->parse_string($string)      unless( $xml{'-html'});
   #XML::LIBXML#  if ( $xml{'-html'}) {
   #XML::LIBXML#    $parser->recover(1);
-  #XML::LIBXML#    eval{$doc = $parser->parse_html_string($string);};
+  #XML::LIBXML#    eval{
+  #XML::LIBXML#      local $SIG{__WARN__} = sub{};
+  #XML::LIBXML#      $doc = $parser->parse_html_string($string);
+  #XML::LIBXML#    };
   #XML::LIBXML##    if ($@) { return undef; }
   #XML::LIBXML#     return undef unless defined $doc;
   #XML::LIBXML#  }
