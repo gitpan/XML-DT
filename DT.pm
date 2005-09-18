@@ -2,31 +2,27 @@
 
 package XML::DT;
 
-BEGIN {
+use strict;
 
-  #XML::LIBXML# use XML::LibXML;
-  #XML::PARSER# use XML::Parser;
+use Data::Dumper;
+use LWP::Simple;
+use XML::DTDParser "ParseDTDFile";
 
-  use Data::Dumper;
-  use LWP::Simple;
-  use XML::DTDParser "ParseDTDFile";
-  use Exporter ();
-  use vars qw($c %v $q @dtcontext %dtcontextcount @dtatributes @dtattributes );
+#XML::LIBXML# use XML::LibXML;
+#XML::PARSER# use XML::Parser;
+#XML::LIBXML# our $PARSER = 'XML::LibXML';
+#XML::PARSER# our $PARSER = 'XML::Parser';
 
-  # Para tirar, parece-me
-  #eval "use bytes";
-  #if (my $m = $INC{"bytes.pm"}) {require bytes; import bytes;}
+use Exporter ();
 
-  @ISA=qw(Exporter);
-  @EXPORT=qw(&dt &dtstring &dturl &inctxt &ctxt &mkdtskel &mkdtskel_fromDTD &mkdtdskel &toxml
-	     &MMAPON $c %v $q &xmltree &pathdturl
-	     @dtcontext %dtcontextcount @dtatributes @dtattributes &pathdt &pathdtstring );
+use vars qw($c %v $q @dtcontext %dtcontextcount @dtatributes @dtattributes );
+  
+our @ISA=qw(Exporter);
+our @EXPORT=qw(&dt &dtstring &dturl &inctxt &ctxt &mkdtskel &mkdtskel_fromDTD &mkdtdskel &toxml &MMAPON $c %v $q &xmltree &pathdturl @dtcontext %dtcontextcount @dtatributes @dtattributes &pathdt &pathdtstring );
 
-  $VERSION = '0.41';
-  #XML::LIBXML# $PARSER = 'XML::LibXML';
-  #XML::PARSER# $PARSER = 'XML::Parser';
+our $VERSION = '0.42';
 
-}
+
 
 =head1 NAME
 
@@ -429,7 +425,7 @@ and/or modify it under the same terms as Perl itself.
 
 
 
-%ty = ();
+our %ty = ();
 
 sub dt {
   my ($file,%xml)=@_;
@@ -1022,6 +1018,9 @@ PERL
 
 sub mkdtskel{
   my @files = @_;
+  my $name;
+  my %element;
+  my %att;
   my %mkdtskel =
     ('-default' => sub{
        $element{$q}++;
@@ -1061,7 +1060,7 @@ END
      }
     );
 
-  $file = shift(@files);
+  my $file = shift(@files);
   while($file =~ /^-/){
     if   ($file eq "-html")   { $mkdtskel{'-html'} = 1;} 
     elsif($file eq "-latin1") { $mkdtskel{'-inputenc'}='ISO-8859-1';}
@@ -1091,7 +1090,12 @@ sub _nodeAttributes {
 
 
 sub mkdtdskel {
-  my @files = @_;
+  my @files = @_; 
+  my $name;
+  my %att;
+  my %ele;
+  my %elel;
+  my $root;
   my %handler=(
     '-outputenc' => 'ISO-8859-1',
     '-default'   => sub{ 
@@ -1109,15 +1113,15 @@ sub mkdtdskel {
     else { die("usage mkdtdskel [-html] [-latin1] file* \n")}
     shift(@files)}
 
-  for $filename (@files){
-  dt($filename,%handler); 
+  for my $filename (@files){
+    dt($filename,%handler); 
   }
 
   print "<!-- DTD $root ... -->\n<!-- (C) ... " . localtime(time) ." -->\n";
   delete $elel{$root};
 
   for ($root, keys %elel){
-    _putele($_);
+    _putele($_, \%ele);
     for $name (keys(%{$att{$_}})) {
        print( "\t<!-- $name : ... -->\n");
        print( "\t<!ATTLIST $_ $name CDATA #IMPLIED >\n");
@@ -1145,14 +1149,14 @@ sub mkdtdskel {
 
 
 sub _putele {
-  my $e = shift;
+  my ($e,$ele) = @_;
   my @f ;
-  if ($ele{$e}) {
-    @f = keys %{$ele{$e}};
+  if ($ele->{$e}) {
+    @f = keys %{$ele->{$e}};
     print "<!ELEMENT $e (", join("|", @f ),")",
       (@f >= 1 && $f[0] eq "#PCDATA" ? "" : "*"),
 	" >\n";
-    print "<!-- ", join(" | ", (map {"$_=$ele{$e}{$_}"} @f )), " -->\n";
+    print "<!-- ", join(" | ", (map {"$_=$ele->{$e}{$_}"} @f )), " -->\n";
   }
   else {
     print "<!ELEMENT $e  EMPTY >\n";

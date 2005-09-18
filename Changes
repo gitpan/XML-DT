@@ -1,5 +1,8 @@
 Revision history for Perl extension XML::DT.
 
+0.42  Sep 18, 2005
+	- Added use strict;
+
 0.41  Jul 20, 2005
 	- Removed warning from HTML parsing;
 
