@@ -2,20 +2,24 @@
 use XML::DT;
 use XML::DTDParser "ParseDTDFile";
 
-our ($dtd, $html);
+our ($dtd, $html, $lines);
 
 my $filename = shift;
 
 $dtd = 1 if ($filename =~ m!\.dtd$!);
 
+
 if ($dtd) {
   mkdtskel_fromDTD ($filename, @ARGV);
 
-} elsif ($html) {
-  mkdtskel ("-html", $filename, @ARGV);
-
-} else {
-  mkdtskel ($filename, @ARGV);
+} else{ 
+   if($lines){
+      system("head -$lines $filename | xmllint --recover - > /tmp/_xml_$$");
+      $filename = "/tmp/_xml_$$";
+   }
+   if ($html) { mkdtskel ("-html", $filename, @ARGV); } 
+   else       { mkdtskel (         $filename, @ARGV); }
+   unlink("/tmp/_xml_$$") if $lines;
 }
 
 __END__
@@ -26,7 +30,7 @@ mkdtskel - Perl code skeleton generator to process XML files with XML::DT
 
 =head1 SYNOPSIS
 
-  mkdtskel <xmlfile>
+  mkdtskel [-lines=20000] <xmlfile>
 
   mkdtskel -dtd <dtdfile>
 
@@ -41,7 +45,7 @@ on the generated file to remember the programmer.
 
 =head1 SEE ALSO
 
-XML::DT(1), mkdtdskel(1) and perl(1)
+XML::DT(1), mkdtdskel(1), mkxmltype(1) and perl(1)
 
 =head1 AUTHORS
 

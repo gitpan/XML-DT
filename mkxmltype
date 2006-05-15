@@ -250,15 +250,25 @@ __END__
 
 =head1 NAME
 
-mkdtskel - camila generator using XML::DT
+mkxmltype - Make XML analysis using XML::DT
 
 =head1 SYNOPSIS
 
-  mkcamilaskel <xmlfile>
+  mkxmltype <xmlfile>
 
 =head1 DESCRIPTION
 
-This command tries to infer camila for a specific XML file;
+This command tries to infer DTD and Camlila-like types for a specific XML file;
+
+=head1 Options
+
+ -latin1             input file encoding is forced to be latin1
+ -html               uses html (libxml2) parser
+ -show_att           Show attribute values
+ -expand_att_id
+ -lines=20000        just reads the first 20000 lines of the XML file
+ -t
+ -shell              Enter interactive shell mode
 
 =head1 SEE ALSO
 

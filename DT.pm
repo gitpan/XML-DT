@@ -16,11 +16,11 @@ use XML::DTDParser "ParseDTDFile";
 use Exporter ();
 
 use vars qw($c %v $q @dtcontext %dtcontextcount @dtatributes @dtattributes );
-  
+
 our @ISA=qw(Exporter);
 our @EXPORT=qw(&dt &dtstring &dturl &inctxt &ctxt &mkdtskel &mkdtskel_fromDTD &mkdtdskel &toxml &MMAPON $c %v $q &xmltree &pathdturl @dtcontext %dtcontextcount @dtatributes @dtattributes &pathdt &pathdtstring );
 
-our $VERSION = '0.42';
+our $VERSION = '0.43';
 
 
 
