@@ -20,7 +20,7 @@ use vars qw($c %v $q @dtcontext %dtcontextcount @dtatributes @dtattributes );
 our @ISA=qw(Exporter);
 our @EXPORT=qw(&dt &dtstring &dturl &inctxt &ctxt &mkdtskel &mkdtskel_fromDTD &mkdtdskel &toxml &MMAPON $c %v $q &xmltree &pathdturl @dtcontext %dtcontextcount @dtatributes @dtattributes &pathdt &pathdtstring );
 
-our $VERSION = '0.43';
+our $VERSION = '0.44';
 
 
 
@@ -649,9 +649,9 @@ sub _testAttr {
       return ! _testAttr($1);
     } elsif (/^('|")([^\1]*)(\1)\s*=\s*('|")([^\4]*)\4$/) {
       return ($2 eq $5);
-    } elsif (/normalize-space\((['"])([^\1)]*)\1\)/) {
-      my ($back,$forward)=($`,$');
-      my $x = _normalize_space($2);
+    } elsif (/^(.*?)normalize-space\((['"])([^\2)]*)\2\)(.*)$/) {
+      my ($back,$forward)=($1,$4);
+      my $x = _normalize_space($3);
       return _testAttr("$back'$x'$forward"); 
     } elsif (/starts-with\((['"])([^\1))]*)\1,(['"])([^\3))]*)\3\)/) {
       my $x = _starts_with($2,$4);
@@ -659,9 +659,9 @@ sub _testAttr {
     } elsif (/contains\((['"])([^\1))]*)\1,(['"])([^\3))]*)\3\)/) {
       my $x = _contains($2,$4);
       return $x; 
-    } elsif (/string-length\((['"])([^\1]*)\1\)/) {
-      my ($back,$forward) = ($`,$');
-      my $x = length($2);
+    } elsif (/^(.*?)string-length\((['"])([^\2]*)\2\)(.*)$/) {
+      my ($back,$forward) = ($1,$4);
+      my $x = length($3);
       return _testAttr("$back$x$forward");
     } elsif (/^(\d+)\s*=(\d+)$/) {
       return ($1 == $2);
