@@ -20,7 +20,7 @@ use vars qw($c %v $q @dtcontext %dtcontextcount @dtatributes @dtattributes );
 our @ISA=qw(Exporter);
 our @EXPORT=qw(&dt &dtstring &dturl &inctxt &ctxt &mkdtskel &mkdtskel_fromDTD &mkdtdskel &toxml &MMAPON $c %v $q &xmltree &pathdturl @dtcontext %dtcontextcount @dtatributes @dtattributes &pathdt &pathdtstring );
 
-our $VERSION = '0.44';
+our $VERSION = '0.45';
 
 
 
@@ -429,6 +429,7 @@ our %ty = ();
 
 sub dt {
   my ($file,%xml)=@_;
+  my ($parser, $tree);
 
   # Treat -decl option
   my $declr = "";
@@ -450,7 +451,7 @@ sub dt {
   #XML::LIBXML## $xml{-inputenc}
 
   #XML::LIBXML## create a new LibXML parser
-  #XML::LIBXML# my $parser = XML::LibXML->new();
+  #XML::LIBXML# $parser = XML::LibXML->new();
 
   #### We don't wan't DT to load everytime the DTD (I Think!)
   #XML::LIBXML# $parser->validation(0);
@@ -474,7 +475,7 @@ sub dt {
   #XML::LIBXML#  else{ $doc = $parser->parse_file($file)  }
 
   #XML::LIBXML## get the document root element
-  #XML::LIBXML#  my $tree = $doc->getDocumentElement();
+  #XML::LIBXML#   $tree = $doc->getDocumentElement();
 
   #XML::PARSER## create a new XML::Parser instance using Tree Style
   #XML::PARSER#  if (defined($xml{-inputenc}) && ($xml{-inputenc} eq 'ISO-8859-1')){
@@ -556,6 +557,7 @@ sub dturl{
 
 sub dtstring {
   my ($string,%xml)=@_;
+  my ($parser, $tree);
 
   my $declr = "";
   if ($xml{-declr}) {
@@ -575,7 +577,7 @@ sub dtstring {
   #XML::LIBXML# $string = XML::LibXML::encodeToUTF8($xml{-inputenc},$string) if ($xml{-inputenc});
 
   #XML::LIBXML## create a new LibXML parser
-  #XML::LIBXML#  my $parser = XML::LibXML->new();
+  #XML::LIBXML#   $parser = XML::LibXML->new();
 
   #XML::LIBXML## parse the string
   #XML::LIBXML#  my $doc;
@@ -592,7 +594,7 @@ sub dtstring {
   #XML::LIBXML#  }
 
   #XML::LIBXML## get the document root element
-  #XML::LIBXML#  my $tree = $doc->getDocumentElement();
+  #XML::LIBXML#   $tree = $doc->getDocumentElement();
 
   #XML::PARSER## create a new XML::Parser instance using Tree Style
   #XML::PARSER#  if (defined($xml{-inputenc}) && ($xml{-inputenc} eq 'ISO-8859-1')){
@@ -870,7 +872,7 @@ sub _omni{
       push(@$r,{"-c" => $aux,
 		"-q" => $name,
 		#XML::LIBXML# _nodeAttributes($tree)
-		#XML::PARSER# %$atr
+		#XML::PARSER# (defined $atr ?  %$atr :())
 	       }) unless _whitepc($aux,$name);
     }
     elsif($type eq "MMAPON"){

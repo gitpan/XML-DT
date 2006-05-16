@@ -1,5 +1,8 @@
 Revision history for Perl extension XML::DT.
 
+0.45  May 16, 2006
+	- Added use strict for XML::Parser backend
+
 0.44  May 15, 2006
 	- Remove the use of $' and $` which makes regular expressions
           a lot slower
