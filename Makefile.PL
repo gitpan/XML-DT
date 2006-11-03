@@ -1,12 +1,15 @@
 use File::Copy;
-#BEGIN {
-#  my $PARSER;
-#  $PARSER = grep { m!^PARSER=! } @ARGV;
-#  @ARGV = grep { $_ ne $PARSER } @ARGV;
-#}
 use ExtUtils::MakeMaker;
 
-my $PARSER;
+my $XML = XML::LibXML;
+$XML = "XML::Parser" if (grep { m!USE_XML_PARSER! } @ARGV);
+
+print "NOTE: Now XML::DT uses by default XML::LibXML\n";
+print "      Execute 'Makefile.PL USE_XML_PARSER' to for XML::Parser usage\n";
+print "\n";
+print "USING: $XML\n";
+print "\n";
+sleep 5;
 
 $xmlparser_version = 2.30;
 $xmllibxml_version = 1.54;
@@ -18,43 +21,22 @@ $xmllibxml_version = 1.54;
 		'XML::DTDParser' => '2.00',
 	       );
 
-if ($PARSER) {
-  $PARSER=~m!PARSER=!;
-  $XML = uc($');
-  unless ($XML eq "XML::PARSER" || $XML eq "XML::LIBXML") {
-    print STDERR "Unknown parser. Using default: XML::LibXML\n";
-    $XML = "XML::LIBXML";
+
+if ($XML eq "XML::Parser") {
+  $req_modules{$XML} = $xmlparser_version;
+  if ($]<5.007003) {
+    # Aqui não temos Encode
+    set_old_compat_func();
+  } else {
+    $req_modules{'Encode'} = 0;
+    set_encode_func();
   }
 } else {
-  print "\n";
-  print " NOTE: Next versions will, possibly, deprecate XML::Parser backend.\n";
-  print "       At the moment, XML::LibXML is quicker than XML::Parser and\n";
-  print "       supports HTML parsing\n\n";
-
-  print "I need a XML Back-end (XML::Parser >= $xmlparser_version or XML::LibXML >= $xmllibxml_version\n";
-  do {
-    print "Sorry, I didn't understand the answer.\n" if $answer;
-    print "Should I use 'XML::Parser' or 'XML::LibXML'? [XML::LibXML] ";
-    $XML = undef;
-    $answer = <STDIN>;
-    print "\n";
-    if ($answer =~ m/^XML::Parser$/i) {
-      $XML = 'XML::Parser';
-      $req_modules{$XML} = $xmlparser_version;
-      if ($]<5.007003) {
-	# Aqui não temos Encode
-	set_old_compat_func();
-      } else {
-	$req_modules{'Encode'} = 0;
-	set_encode_func();
-      }
-    } elsif ($answer =~ m/^\s*$/ || $answer =~ m/^XML::LibXML$/i) {
-      $XML = 'XML::LibXML';
-      $req_modules{$XML} = $xmllibxml_version;
-      set_libxml_func();
-    }
-  } until defined $XML;
+  $XML = 'XML::LibXML';
+  $req_modules{$XML} = $xmllibxml_version;
+  set_libxml_func();
 }
+
 my $pattern = uc($XML);
 $PM_FILTER = qq(perl -npe \"s/\\#$pattern\\#//;\");
 

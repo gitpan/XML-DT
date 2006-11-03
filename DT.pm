@@ -20,7 +20,7 @@ use vars qw($c %v $q @dtcontext %dtcontextcount @dtatributes @dtattributes );
 our @ISA=qw(Exporter);
 our @EXPORT=qw(&dt &dtstring &dturl &inctxt &ctxt &mkdtskel &mkdtskel_fromDTD &mkdtdskel &toxml &MMAPON $c %v $q &xmltree &pathdturl @dtcontext %dtcontextcount @dtatributes @dtattributes &pathdt &pathdtstring );
 
-our $VERSION = '0.45';
+our $VERSION = '0.46';
 
 
 
@@ -1021,6 +1021,7 @@ PERL
 sub mkdtskel{
   my @files = @_;
   my $name;
+  my $HTML = "";
   my %element;
   my %att;
   my %mkdtskel =
@@ -1047,6 +1048,7 @@ my $filename = shift;
 #    '-outputenc' => 'ISO-8859-1',
 #    '-default'   => sub{"<$q>$c</$q>"},
 END
+       print $HTML;
        for $name (sort keys %element) {
 	 print "     '$name' => sub{ }, #";
 	 print " $element{$name} occurrences;";
@@ -1064,7 +1066,9 @@ END
 
   my $file = shift(@files);
   while($file =~ /^-/){
-    if   ($file eq "-html")   { $mkdtskel{'-html'} = 1;} 
+    if   ($file eq "-html")   {
+        $HTML = "     '-html' => 1,\n";
+        $mkdtskel{'-html'} = 1;} 
     elsif($file eq "-latin1") { $mkdtskel{'-inputenc'}='ISO-8859-1';}
     else { die("usage mktskel [-html] [-latin1] file \n")}
     $file=shift(@files)}

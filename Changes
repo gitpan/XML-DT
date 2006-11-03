@@ -1,5 +1,9 @@
 Revision history for Perl extension XML::DT.
 
+0.46  Nov  3, 2006
+	- mkdtskel for a HTML adds -html flag
+        - XML::LibXML is used by default.
+
 0.45  May 16, 2006
 	- Added use strict for XML::Parser backend
 

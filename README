@@ -15,7 +15,6 @@ Feedback welcome -> jj@di.uminho.pt
 This document is also available in HTML (pod2html'ized):
 http://www.di.uminho.pt/~jj/perl/XML/XML-DT.readme.html
 
- . based on XML::Parser (tree mode).
  . design to do simple and compact translation/processing of XML document
  . it includes some features of omnimark and sgmls.pm; functional approach
  . it includes functions to automatic build user controlled complex Perl 
