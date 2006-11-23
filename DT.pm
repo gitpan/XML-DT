@@ -8,21 +8,23 @@ use Data::Dumper;
 use LWP::Simple;
 use XML::DTDParser "ParseDTDFile";
 
-#XML::LIBXML# use XML::LibXML;
-#XML::PARSER# use XML::Parser;
-#XML::LIBXML# our $PARSER = 'XML::LibXML';
-#XML::PARSER# our $PARSER = 'XML::Parser';
+use XML::LibXML;
+our $PARSER = 'XML::LibXML';
 
 use Exporter ();
 
-use vars qw($c %v $q @dtcontext %dtcontextcount @dtatributes @dtattributes );
+use vars qw($c %v $q @dtcontext %dtcontextcount @dtatributes
+            @dtattributes );
 
-our @ISA=qw(Exporter);
-our @EXPORT=qw(&dt &dtstring &dturl &inctxt &ctxt &mkdtskel &mkdtskel_fromDTD &mkdtdskel &toxml &MMAPON $c %v $q &xmltree &pathdturl @dtcontext %dtcontextcount @dtatributes @dtattributes &pathdt &pathdtstring );
+our @ISA = qw(Exporter);
 
-our $VERSION = '0.46';
+our @EXPORT = qw(&dt &dtstring &dturl &inctxt &ctxt &mkdtskel
+                 &mkdtskel_fromDTD &mkdtdskel &toxml &MMAPON $c %v $q
+                 &xmltree &pathdturl @dtcontext %dtcontextcount
+                 @dtatributes @dtattributes &pathdt &pathdtstring
+                 &father &gfather &ggfather &root);
 
-
+our $VERSION = '0.47';
 
 =head1 NAME
 
@@ -48,13 +50,11 @@ contents.
 =head1 DESCRIPTION
 
 This module processes XML files with an approach similar to
-OMNIMARK. As XML parser it uses XML::Parser or XML::LibXML module in
-an independent way. At configure stage, you should choose one of the
-back-ends.
+OMNIMARK. As XML parser it uses XML::LibXML module in an independent
+way.
 
-If you use XML::LibXML module as backend, you can parse HTML files as
-if they were XML files. For this, you must supply an extra option to
-the hash:
+Uou can parse HTML files as if they were XML files. For this, you must
+supply an extra option to the hash:
 
  %hander = ( -html => 1,
              ...
@@ -195,6 +195,47 @@ In the same way, you can use C<$dtattributes[2]> to access the
 grand-parent. C<$dtattributes[-1]> is, as expected, the XML document
 root element.
 
+There are some shortcuts:
+
+=over 4
+
+=item C<father>
+
+=item C<gfather>
+
+=item C<ggfather>
+
+You can use these functions to access to your C<father>, grand-father
+(C<gfather>) or grand-grand-father (C<ggfather>):
+
+   father("attribute"); # returns value for this attribute on father
+                        # element
+   father("attribute", "value"); # sets value for this attribute on father
+                                 # element
+
+You can also use it directly as a reference to C<@dtattributes>:
+
+   father->{"attribute"};           # gets the attribute
+   father->{"attribute"} = "value"; # sets the attribute
+   $attributes = father;            # gets all attributes reference
+
+
+=item C<root>
+
+You can use it as a function to access to your tree root element.
+
+   root("attribute"); # returns value for this attribute on root
+                      # element
+   root("attribute", "value"); # sets value for this attribute on root
+                               # element
+
+You can also use it directly as a reference to C<$dtattributes[-1]>:
+
+   root->{"attribute"};           # gets the attribute
+   root->{"attribute"} = "value"; # sets the attribute
+   $attributes = root;            # gets all attributes reference
+
+=back
 
 =head1 User provided element processing functions
 
@@ -416,7 +457,7 @@ Mark A. Hillebrand
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 1999-2004 by Projecto Natura
+Copyright 1999-2006 by Projecto Natura
 
 This library is free software; you can redistribute it
 and/or modify it under the same terms as Perl itself.
@@ -447,59 +488,46 @@ sub dt {
 
   &{$xml{-begin}} if $xml{-begin};
 
-  #XML::LIBXML## TODO --- how to force encoding with XML::LibXML?
-  #XML::LIBXML## $xml{-inputenc}
+  # TODO --- how to force encoding with XML::LibXML?
+  # $xml{-inputenc}
 
-  #XML::LIBXML## create a new LibXML parser
-  #XML::LIBXML# $parser = XML::LibXML->new();
+  # create a new LibXML parser
+  $parser = XML::LibXML->new();
 
   #### We don't wan't DT to load everytime the DTD (I Think!)
-  #XML::LIBXML# $parser->validation(0);
-  #XML::LIBXML# $parser->expand_xinclude(0);  # testing
-  #XML::LIBXML# $parser->load_ext_dtd(0);
-  #XML::LIBXML# $parser->expand_entities(0);
+  $parser->validation(0);
+  $parser->expand_xinclude(0);  # testing
+  $parser->load_ext_dtd(0);
+  $parser->expand_entities(0);
 
-  #XML::LIBXML## parse the file
-  #XML::LIBXML#  my $doc;
-  #XML::LIBXML#  if    ( $xml{'-html'}) {
-  #XML::LIBXML#     $parser->recover(1);
-  #XML::LIBXML##    $parser->recover_silently(1);
+  # parse the file
+  my $doc;
+  if ( $xml{'-html'}) {
 
-  #XML::LIBXML#     eval{
-  #XML::LIBXML#       local $SIG{__WARN__} = sub{};
-  #XML::LIBXML#       $doc = $parser->parse_html_file($file);
-  #XML::LIBXML#     };
-  #XML::LIBXML##    if ($@) {warn("Erro: $@\n"); } #{return undef; }
-  #XML::LIBXML#     return undef if !$doc;
-  #XML::LIBXML#  }
-  #XML::LIBXML#  else{ $doc = $parser->parse_file($file)  }
+    $parser->recover(1);
+    #    $parser->recover_silently(1);
 
-  #XML::LIBXML## get the document root element
-  #XML::LIBXML#   $tree = $doc->getDocumentElement();
+    eval{
+      local $SIG{__WARN__} = sub{};
+      $doc = $parser->parse_html_file($file);
+    };
+    #    if ($@) {warn("Erro: $@\n"); } #{return undef; }
+    return undef if !$doc;
 
-  #XML::PARSER## create a new XML::Parser instance using Tree Style
-  #XML::PARSER#  if (defined($xml{-inputenc}) && ($xml{-inputenc} eq 'ISO-8859-1')){
-  #XML::PARSER#     $parser = new XML::Parser(Style => 'Tree',
-  #XML::PARSER#                               ErrorContext => 2 ,
-  #XML::PARSER#                               ProtocolEncoding => 'ISO-8859-1');
-  #XML::PARSER#  }
-  #XML::PARSER#  else { $parser = new XML::Parser(Style => 'Tree',
-  #XML::PARSER#                                   ErrorContext => 2 ,
-  #XML::PARSER#                                  );
-  #XML::PARSER#  }
+  } else{
+    $doc = $parser->parse_file($file)
+  }
 
-  #XML::PARSER## Convert XML to Perl code
-  #XML::PARSER#  $tree = $parser->parsefile($file);
+  # get the document root element
+  $tree = $doc->getDocumentElement();
 
   my $return = "";
   # execute End action if it exists
   if($xml{-end}) {
-    #XML::LIBXML#    $c = _omni("-ROOT", \%xml, $tree);
-    #XML::PARSER#    $c = _omni("-ROOT", \%xml, @$tree);
+    $c = _omni("-ROOT", \%xml, $tree);
     $return = &{$xml{-end}}
   } else {
-    #XML::LIBXML#    $return = _omni("-ROOT",\%xml, $tree)
-    #XML::PARSER#    $return = _omni("-ROOT",\%xml, @$tree)
+    $return = _omni("-ROOT",\%xml, $tree)
   }
 
   if ($declr) {
@@ -510,13 +538,10 @@ sub dt {
 }
 
 
-
-
 sub ctxt {
   my $level = $_[0];
   $dtcontext[-$level-1];
 }
-
 
 
 sub inctxt {
@@ -526,6 +551,35 @@ sub inctxt {
   join("/",@dtcontext) =~ m!$pattern/[^/]*$! ;
 }
 
+sub father {
+  my ($a,$b)=@_;
+  if   (defined($b)){$dtattributes[1]{$a} = $b}
+  elsif(defined($a)){$dtattributes[1]{$a} }
+  else              {$dtattributes[1]}
+}
+
+sub gfather {
+  my ($a,$b)=@_;
+  if   (defined($b)){$dtattributes[2]{$a} = $b}
+  elsif(defined($a)){$dtattributes[2]{$a} }
+  else              {$dtattributes[2]}
+}
+
+
+sub ggfather {
+  my ($a,$b)=@_;
+  if   (defined($b)){$dtattributes[3]{$a} = $b}
+  elsif(defined($a)){$dtattributes[3]{$a} }
+  else              {$dtattributes[3]}
+}
+
+
+sub root {         ### the root
+  my ($a,$b)=@_;
+  if   (defined($b)){$dtattributes[-1]{$a} = $b }
+  elsif(defined($a)){$dtattributes[-1]{$a} }
+  else              {$dtattributes[-1] }
+}
 
 sub pathdtstring{
   my $string = shift;
@@ -574,52 +628,36 @@ sub dtstring {
   # execute Begin action if it exists
   if ($xml{-begin}){ &{$xml{-begin}} }
 
-  #XML::LIBXML# $string = XML::LibXML::encodeToUTF8($xml{-inputenc},$string) if ($xml{-inputenc});
+  $string = XML::LibXML::encodeToUTF8($xml{-inputenc},$string) if ($xml{-inputenc});
 
-  #XML::LIBXML## create a new LibXML parser
-  #XML::LIBXML#   $parser = XML::LibXML->new();
+  # create a new LibXML parser
+  $parser = XML::LibXML->new();
 
-  #XML::LIBXML## parse the string
-  #XML::LIBXML#  my $doc;
+  # parse the string
+  my $doc;
 
-  #XML::LIBXML#  $doc = $parser->parse_string($string)      unless( $xml{'-html'});
-  #XML::LIBXML#  if ( $xml{'-html'}) {
-  #XML::LIBXML#    $parser->recover(1);
-  #XML::LIBXML#    eval{
-  #XML::LIBXML#      local $SIG{__WARN__} = sub{};
-  #XML::LIBXML#      $doc = $parser->parse_html_string($string);
-  #XML::LIBXML#    };
-  #XML::LIBXML##    if ($@) { return undef; }
-  #XML::LIBXML#     return undef unless defined $doc;
-  #XML::LIBXML#  }
+  $doc = $parser->parse_string($string)      unless( $xml{'-html'});
+  if ( $xml{'-html'}) {
+    $parser->recover(1);
+    eval{
+      local $SIG{__WARN__} = sub{};
+      $doc = $parser->parse_html_string($string);
+    };
+    #    if ($@) { return undef; }
+    return undef unless defined $doc;
+  }
 
-  #XML::LIBXML## get the document root element
-  #XML::LIBXML#   $tree = $doc->getDocumentElement();
-
-  #XML::PARSER## create a new XML::Parser instance using Tree Style
-  #XML::PARSER#  if (defined($xml{-inputenc}) && ($xml{-inputenc} eq 'ISO-8859-1')){
-  #XML::PARSER#     $parser = new XML::Parser(Style => 'Tree',
-  #XML::PARSER#                               ErrorContext => 2 ,
-  #XML::PARSER#                               ProtocolEncoding => 'ISO-8859-1');
-  #XML::PARSER#  }
-  #XML::PARSER#  else { $parser = new XML::Parser(Style => 'Tree',
-  #XML::PARSER#                                   ErrorContext => 2 ,
-  #XML::PARSER#                                  );
-  #XML::PARSER#  }
-
-  #XML::PARSER## Convert XML to Perl code (Tree)
-  #XML::PARSER#  $tree = $parser->parse($string);
+  # get the document root element
+  $tree = $doc->getDocumentElement();
 
   my $return;
 
   # Check if we have an end function
   if ($xml{-end}) {
-    #XML::LIBXML#    $c = _omni("-ROOT", \%xml, $tree);
-    #XML::PARSER#    $c = _omni("-ROOT", \%xml, @$tree);
+    $c = _omni("-ROOT", \%xml, $tree);
     $return = &{$xml{-end}}
   } else {
-    #XML::LIBXML#    $return = _omni("-ROOT", \%xml, $tree)
-    #XML::PARSER#    $return = _omni("-ROOT", \%xml, @$tree)
+    $return = _omni("-ROOT", \%xml, $tree)
   }
 
   if ($declr) {
@@ -793,104 +831,100 @@ sub _omni{
   my ($name, $val, @val, $atr, $aux);
 
   while(@l) {
-    #XML::LIBXML#    my $tree = shift @l;
-    #XML::LIBXML#    if (ref($tree) eq "XML::LibXML::CDATASection") {
-    #XML::LIBXML#      $name = "-pcdata";
-    #XML::LIBXML##      $val = $tree->getData();
-    #XML::LIBXML##      print STDERR Dumper($val);
-    #XML::LIBXML##      $aux= (defined($xml->{-outputenc}))?_fromUTF8($val,$xml->{-outputenc}):$val;
-    #XML::LIBXML##      if (defined($xml->{-pcdata})) {
-    #XML::LIBXML##	      push(@dtcontext,"-pcdata");
-    #XML::LIBXML###	      $c = $aux;
-    #XML::LIBXML####	      $aux = &{$xml->{-pcdata}};
-    #XML::LIBXML##	      pop(@dtcontext);
-    #XML::LIBXML##      }
-    #XML::LIBXML#    } else {
-    #XML::LIBXML#      $name = $tree->getName();
-    #XML::LIBXML#    }
-    #XML::PARSER#    ($name,$val,@l) = @l;
+        my $tree = shift @l;
+        if (ref($tree) eq "XML::LibXML::CDATASection") {
+          $name = "-pcdata";
+    #      $val = $tree->getData();
+    #      print STDERR Dumper($val);
+    #      $aux= (defined($xml->{-outputenc}))?_fromUTF8($val,$xml->{-outputenc}):$val;
+    #      if (defined($xml->{-pcdata})) {
+    #	      push(@dtcontext,"-pcdata");
+    ##	      $c = $aux;
+    ###	      $aux = &{$xml->{-pcdata}};
+    #	      pop(@dtcontext);
+    #      }
+        } else {
+          $name = $tree->getName();
+        }
 
-    #XML::LIBXML#    if (ref($tree) eq "XML::LibXML::Comment") {
-    #XML::LIBXML#      ### At the moment, treat as Text
-    #XML::LIBXML#      ### We will need to change this, I hope!
-    #XML::LIBXML#      $val = "";
-    #XML::LIBXML#      $name = "-pcdata";
-    #XML::LIBXML#      $aux= (defined($xml->{-outputenc}))?_fromUTF8($val, $xml->{-outputenc}):$val;
-    #XML::LIBXML#      if (defined($xml->{-pcdata})) {
-    #XML::LIBXML#	       push(@dtcontext,"-pcdata");
-    #XML::LIBXML#	       $c = $aux;
-    #XML::LIBXML#	       $aux = &{$xml->{-pcdata}};
-    #XML::LIBXML#	       pop(@dtcontext);
-    #XML::LIBXML#      }
+        if (ref($tree) eq "XML::LibXML::Comment") {
+          ### At the moment, treat as Text
+          ### We will need to change this, I hope!
+          $val = "";
+          $name = "-pcdata";
+          $aux= (defined($xml->{-outputenc}))?_fromUTF8($val, $xml->{-outputenc}):$val;
+          if (defined($xml->{-pcdata})) {
+    	       push(@dtcontext,"-pcdata");
+    	       $c = $aux;
+    	       $aux = &{$xml->{-pcdata}};
+    	       pop(@dtcontext);
+          }
 
-    #XML::LIBXML#    } elsif (ref($tree) eq "XML::LibXML::Text" || ref($tree) eq "XML::LibXML::CDATASection")
-    #XML::PARSER#    if ($name eq "0")
-    {
-      #XML::LIBXML#      $val = $tree->getData();
+        }
+        elsif (ref($tree) eq "XML::LibXML::Text" || ref($tree) eq "XML::LibXML::CDATASection")
+          {
+            $val = $tree->getData();
 
-      $name = "-pcdata";
-      $aux = (defined($xml->{-outputenc}))?_fromUTF8($val,$xml->{-outputenc}):$val;
+            $name = "-pcdata";
+            $aux = (defined($xml->{-outputenc}))?_fromUTF8($val,$xml->{-outputenc}):$val;
 
-      if (defined($xml->{-pcdata})) {
-	push(@dtcontext,"-pcdata");
-	$c = $aux;
-	$aux = &{$xml->{-pcdata}};
-	pop(@dtcontext);
+            if (defined($xml->{-pcdata})) {
+              push(@dtcontext,"-pcdata");
+              $c = $aux;
+              $aux = &{$xml->{-pcdata}};
+              pop(@dtcontext);
+            }
+
+          } else {
+            my %atr = _nodeAttributes($tree);
+            $atr = \%atr;
+
+            if (exists($xml->{-ignorecase})) {
+              $name = lc($name);
+              for (keys %$atr) {
+                my ($k,$v) = (lc($_),$atr->{$_});
+                delete($atr->{$_});
+                $atr->{$k} = $v;
+              }
+            }
+
+
+            push(@dtcontext,$name);
+            $dtcontextcount{$name}++;
+            unshift(@dtatributes, $atr);
+            unshift(@dtattributes, $atr);
+            $aux = _omniele($xml, $name, _omni($name, $xml, ($tree->getChildnodes())), $atr);
+            shift(@dtatributes);
+            shift(@dtattributes);
+            pop(@dtcontext); $dtcontextcount{$name}--;
+          }
+        if    ($type eq "STR"){ if (defined($aux)) {$r .= $aux} ;}
+        elsif ($type eq "THE_CHILD" or $type eq "LAST_CHILD"){
+          $r = $aux unless _whitepc($aux, $name); }
+        elsif ($type eq "SEQ" or $type eq "ARRAY"){
+          push(@$r, $aux) unless _whitepc($aux, $name);}
+        elsif ($type eq "SEQH" or $type eq "ARRAYHASH"){
+          push(@$r,{"-c" => $aux,
+                    "-q" => $name,
+                    _nodeAttributes($tree)
+                   }) unless _whitepc($aux,$name);
+        }
+        elsif($type eq "MMAPON"){
+          if(not _whitepc($aux,$name)){
+            if(! $typeargs{$name}) {
+              warn "duplicated tag '$name'\n" if(defined($r->{$name}));
+              $r->{$name} = $aux }
+            else { push(@{$r->{$name}},$aux) unless _whitepc($aux,$name)}}
+        }
+        elsif($type eq "MAP" or $type eq "HASH"){
+          if(not _whitepc($aux,$name)){
+            warn "duplicated tag '$name'\n" if(defined($r->{$name}));
+            $r->{$name} = $aux }}
+        elsif($type eq "MULTIMAP"){
+          push(@{$r->{$name}},$aux) unless _whitepc($aux,$name)}
+        elsif($type eq "NONE"){ $r = $aux;}
+        else { $r="undefined type !!!"}
       }
-
-    } else {
-      #XML::LIBXML#      my %atr = _nodeAttributes($tree);
-      #XML::LIBXML#      $atr = \%atr;
-      #XML::PARSER#      ($atr,@val) = @$val;
-
-      if (exists($xml->{-ignorecase})) {
-	$name = lc($name);
-	for (keys %$atr) {
-	  my ($k,$v) = (lc($_),$atr->{$_});
-	  delete($atr->{$_});
-	  $atr->{$k} = $v;
-	}
-      }
-
-
-      push(@dtcontext,$name);
-      $dtcontextcount{$name}++;
-      unshift(@dtatributes, $atr);
-      unshift(@dtattributes, $atr);
-      #XML::LIBXML#      $aux = _omniele($xml, $name, _omni($name, $xml, ($tree->getChildnodes())), $atr);
-      #XML::PARSER#      $aux = _omniele($xml, $name, _omni($name, $xml, @val), $atr);
-      shift(@dtatributes);
-      shift(@dtattributes);
-      pop(@dtcontext); $dtcontextcount{$name}--;
-    }
-    if    ($type eq "STR"){ if (defined($aux)) {$r .= $aux} ;}
-    elsif ($type eq "THE_CHILD" or $type eq "LAST_CHILD"){
-      $r = $aux unless _whitepc($aux, $name); }
-    elsif ($type eq "SEQ" or $type eq "ARRAY"){
-      push(@$r, $aux) unless _whitepc($aux, $name);}
-    elsif ($type eq "SEQH" or $type eq "ARRAYHASH"){
-      push(@$r,{"-c" => $aux,
-		"-q" => $name,
-		#XML::LIBXML# _nodeAttributes($tree)
-		#XML::PARSER# (defined $atr ?  %$atr :())
-	       }) unless _whitepc($aux,$name);
-    }
-    elsif($type eq "MMAPON"){
-      if(not _whitepc($aux,$name)){
-	if(! $typeargs{$name}) {
-	  warn "duplicated tag '$name'\n" if(defined($r->{$name}));
-	  $r->{$name} = $aux }
-	else { push(@{$r->{$name}},$aux) unless _whitepc($aux,$name)}}
-    }
-    elsif($type eq "MAP" or $type eq "HASH"){
-      if(not _whitepc($aux,$name)){
-	warn "duplicated tag '$name'\n" if(defined($r->{$name}));
-	$r->{$name} = $aux }}
-    elsif($type eq "MULTIMAP"){
-      push(@{$r->{$name}},$aux) unless _whitepc($aux,$name)}
-    elsif($type eq "NONE"){ $r = $aux;}
-    else { $r="undefined type !!!"}
-  }
   $r;
 }
 
@@ -1135,25 +1169,6 @@ sub mkdtdskel {
   }
 }
 
-
-# This is NOT being used.
-#
-# sub _process_libxml {
-#   my $node = shift;
-#   my $ref = ref($node);
-#   if ($ref eq "XML::LibXML::Text") {
-#     return [0, $node->toString() ];
-#   } else {
-#     my $name = $node->getName();
-#     my %attr = ( map { ($_->getName(), $_->getValue()) } $node->getAttributes() );
-
-#     my $x = [ $name, [ { %attr }, map {my $w =  _process_libxml($_); @$w } $node->getChildnodes()  ]];
-#     return $x;
-#   }
-# }
-
-
-
 sub _putele {
   my ($e,$ele) = @_;
   my @f ;
@@ -1177,18 +1192,7 @@ sub MMAPON {
   bless([@_],"mmapon")
 }
 
-# not being used...
-#
-# sub SEQOF {
-#   bless([@_],"seqof")
-# }
 
-
-#######################################
-#                                     #
-#  Auxiliary functions for encodings  #
-#                                     #
-### STARTLATIN1 #######################
 sub _fromUTF8 {
   my $string = shift;
   my $encode = shift;
@@ -1199,6 +1203,5 @@ sub _fromUTF8 {
     return $ans
   }
 }
-### ENDLATIN1
 
 1;

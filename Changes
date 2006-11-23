@@ -1,5 +1,9 @@
 Revision history for Perl extension XML::DT.
 
+0.47  Nov 23, 2006
+        - finally, XML::Parser backend was removed.
+        - Added father, gfather, ggfather and root acessing method.
+
 0.46  Nov  3, 2006
 	- mkdtskel for a HTML adds -html flag
         - XML::LibXML is used by default.
