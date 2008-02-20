@@ -1,5 +1,8 @@
 Revision history for Perl extension XML::DT.
 
+0.49  Feb 21, 2008
+	- Fixed a typo
+
 0.48  Feb 21, 2008
 	- added tohtml function. Does the same as toxml, but does not 
           create empty tags.

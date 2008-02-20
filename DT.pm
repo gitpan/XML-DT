@@ -24,7 +24,7 @@ our @EXPORT = qw(&dt &dtstring &dturl &inctxt &ctxt &mkdtskel
                  @dtatributes @dtattributes &pathdt &pathdtstring
                  &father &gfather &ggfather &root);
 
-our $VERSION = '0.48';
+our $VERSION = '0.49';
 
 =head1 NAME
 
@@ -952,7 +952,7 @@ sub _omniele {
     { &{$xml->{$q}} }
   elsif (defined $xml->{'-default'})
     { &{$xml->{'-default'}} }
-  elsif (defined $xml->{'-toshtml'})
+  elsif (defined $xml->{'-tohtml'})
     { tohtml() }
   else
     { toxml() }
