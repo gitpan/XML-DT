@@ -17,12 +17,33 @@ my $M;
 my %handler = (
    '-default'   => sub {$c},
    'article' => sub {
-           $v{issue} = $dtattributes[1]->{number};
-           $v{volume} = $dtattributes[2]->{number};
+#           $v{issue} = $dtattributes[1]->{number};
+#           $v{volume} = $dtattributes[2]->{number};
+           $v{issue}  = father("number");
+           $v{volume} = gfather("number");
 
-           $M .= join("\t", @v{(@order)}) . "\n";
+           $M .= join(" :\t", @v{(@order)}) . "\n";
     },
  );
 
  dt ("ex11.5.xml", %handler);
  print  $M;
+
+__END__
+
+<main>
+<volume number="27">
+  <issue number="7">
+   <article doi="10.1006/jmcc.1995.0129" artid="mc950129" f_page="1359" l_page="1367"
+            type="xx" author="Juhani Knuuti, M." epub="" ppub="19950700" />
+   <article doi="10.1006/jmcc.1995.0130" artid="mc950130" f_page="1369" l_page="1381"
+            type="xx" author="Cross, H.R." epub="" ppub="19950700" />
+  </issue>
+
+  <issue number="8">
+    <article doi="10.1006/jmcc.1995.0129" artid="mc950129" f_page="1359" l_page="1367"
+            type="xx" author="Juhani Knuuti, M." epub="" ppub="19950700" />
+    <article doi="10.1006/jmcc.1995.0130" artid="mc950130" f_page="1369" l_page="1381"
+            type="xx" author="Cross, H.R." epub="" ppub="19950700" />
+</issue>
+

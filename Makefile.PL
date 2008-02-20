@@ -6,7 +6,7 @@ use ExtUtils::MakeMaker;
 		'Test::More' => '0.40',
 		'LWP::Simple' => '1.35',
 		'XML::DTDParser' => '2.00',
-                'XML::LibXML' => '1.54',
+        'XML::LibXML' => '1.54',
 	       );
 
 WriteMakefile(

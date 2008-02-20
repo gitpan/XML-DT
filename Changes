@@ -1,19 +1,24 @@
 Revision history for Perl extension XML::DT.
 
+0.48  Feb 21, 2008
+	- added tohtml function. Does the same as toxml, but does not 
+          create empty tags.
+	- use -tohtml=>1 in a handler to use tohtml instead of toxml
+
 0.47  Nov 23, 2006
-        - finally, XML::Parser backend was removed.
-        - Added father, gfather, ggfather and root acessing method.
+	- finally, XML::Parser backend was removed.
+	- Added father, gfather, ggfather and root acessing method.
 
 0.46  Nov  3, 2006
 	- mkdtskel for a HTML adds -html flag
-        - XML::LibXML is used by default.
+	- XML::LibXML is used by default.
 
 0.45  May 16, 2006
 	- Added use strict for XML::Parser backend
 
 0.44  May 15, 2006
 	- Remove the use of $' and $` which makes regular expressions
-          a lot slower
+	  a lot slower
 
 0.43  May 15, 2006 (bad release)
 

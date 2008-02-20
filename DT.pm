@@ -19,12 +19,12 @@ use vars qw($c %v $q @dtcontext %dtcontextcount @dtatributes
 our @ISA = qw(Exporter);
 
 our @EXPORT = qw(&dt &dtstring &dturl &inctxt &ctxt &mkdtskel
-                 &mkdtskel_fromDTD &mkdtdskel &toxml &MMAPON $c %v $q
+                 &mkdtskel_fromDTD &mkdtdskel &tohtml &toxml &MMAPON $c %v $q
                  &xmltree &pathdturl @dtcontext %dtcontextcount
                  @dtatributes @dtattributes &pathdt &pathdtstring
                  &father &gfather &ggfather &root);
 
-our $VERSION = '0.47';
+our $VERSION = '0.48';
 
 =head1 NAME
 
@@ -157,6 +157,13 @@ returns:
 
  <a href='http://local/f.html'>example</a>
 
+Empty tags are written as empty tags. If you want an empty tag with opening and
+closing tags, then use the C<tohtml>.
+
+=head2 tohtml
+
+See C<toxml>.
+
 =head2 xmltree
 
 This simple function just makes a HASH reference:
@@ -206,17 +213,16 @@ There are some shortcuts:
 =item C<ggfather>
 
 You can use these functions to access to your C<father>, grand-father
-(C<gfather>) or grand-grand-father (C<ggfather>):
+(C<gfather>) or great-grand-father (C<ggfather>):
 
-   father("attribute"); # returns value for this attribute on father
-                        # element
-   father("attribute", "value"); # sets value for this attribute on father
+   father("x"); # returns value for attribute "x" on father element
+   father("x", "value"); # sets value for attribute "x" on father
                                  # element
 
 You can also use it directly as a reference to C<@dtattributes>:
 
-   father->{"attribute"};           # gets the attribute
-   father->{"attribute"} = "value"; # sets the attribute
+   father->{"x"};           # gets the attribute
+   father->{"x"} = "value"; # sets the attribute
    $attributes = father;            # gets all attributes reference
 
 
@@ -224,16 +230,14 @@ You can also use it directly as a reference to C<@dtattributes>:
 
 You can use it as a function to access to your tree root element.
 
-   root("attribute"); # returns value for this attribute on root
-                      # element
-   root("attribute", "value"); # sets value for this attribute on root
-                               # element
+   root("x");          # gets attribute C<x> on root element
+   root("x", "value"); # sets value for attribute C<x> on root
 
 You can also use it directly as a reference to C<$dtattributes[-1]>:
 
-   root->{"attribute"};           # gets the attribute
-   root->{"attribute"} = "value"; # sets the attribute
-   $attributes = root;            # gets all attributes reference
+   root->{"x"};           # gets the attribute x
+   root->{"x"} = "value"; # sets the attribute x
+   $attributes = root;    # gets all attributes reference
 
 =back
 
@@ -496,9 +500,10 @@ sub dt {
 
   #### We don't wan't DT to load everytime the DTD (I Think!)
   $parser->validation(0);
-  $parser->expand_xinclude(0);  # testing
+  # $parser->expand_xinclude(0);  # testing
   $parser->load_ext_dtd(0);
   $parser->expand_entities(0);
+  $parser->expand_xincludes(1) if $xml{'-xinclude'};
 
   # parse the file
   my $doc;
@@ -947,6 +952,8 @@ sub _omniele {
     { &{$xml->{$q}} }
   elsif (defined $xml->{'-default'})
     { &{$xml->{'-default'}} }
+  elsif (defined $xml->{'-toshtml'})
+    { tohtml() }
   else
     { toxml() }
 }
@@ -955,6 +962,50 @@ sub _omniele {
 
 sub xmltree { +{'-c' => $c, '-q' => $q, %v} }
 
+sub tohtml {
+	my ($q,$v,$c);
+	
+	if (not @_) {
+		($q,$v,$c) = ($XML::DT::q, \%XML::DT::v, $XML::DT::c);
+	} elsif (ref($_[0])) {
+		$c = shift;
+	} else {
+		($q,$v,$c) = @_;
+	}
+	
+  if (not ref($c)) {
+    if ($q eq "-pcdata") {
+      return $c
+    } else {
+      return _openTag($q,$v) . "$c</$q>"
+    }
+  }
+  elsif (ref($c) eq "HASH" && $c->{'-q'} && $c->{'-c'}) {
+    my %a = %$c;
+    my ($q,$c) = delete @a{"-q","-c"};
+    tohtml($q,\%a,(ref($c)?tohtml($c):$c));
+  }
+  elsif (ref($c) eq "HASH") {
+    _openTag($q,$v).
+      join("",map {($_ ne "-pcdata")
+		     ? ( (ref($c->{$_}) eq "ARRAY")
+			 ? "<$_>".
+			 join("</$_>\n<$_>", @{$c->{$_}}).
+			 "</$_>\n" 
+			 : tohtml($_,{},$c->{$_})."\n" )
+		       : () }
+	   keys %{$c} ) .
+	     "$c->{-pcdata}</$q>" } ########  "NOTYetREady"
+  elsif (ref($c) eq "ARRAY") {
+    if (defined($q) && exists($ty{$q}) && $ty{$q} eq "SEQH") {
+      tohtml($q,$v,join("\n",map {tohtml($_)} @$c))
+    } elsif (defined $q) {
+      tohtml($q,$v,join("",@{$c}))
+    } else {
+      join("\n",map {(ref($_)?tohtml($_):$_)} @$c)
+    }
+  }
+}
 
 sub toxml {
   my ($q,$v,$c);
