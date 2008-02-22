@@ -1,6 +1,6 @@
 # -*- cperl -*-
 
-use Test::More tests => 23;
+use Test::More tests => 26;
 
 BEGIN {
   use_ok( 'XML::DT' );
@@ -16,7 +16,11 @@ is(XML::DT::_normalize_space(" spaces   in   \t the middle\t"),
 
 # toxml as function
 is(toxml("a",{},""), "<a/>");
+
 is(tohtml("a",{},""), "<a></a>");
+is(tohtml("br",{},""), "<br>");
+is(tohtml("hr",{},""), "<hr>");
+is(tohtml("img",{src=>"foo"},""), "<img src=\"foo\">");
 
 is(toxml("a",{},"c"), "<a>c</a>");
 is(tohtml("a",{},"c"), "<a>c</a>");

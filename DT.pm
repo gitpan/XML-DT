@@ -24,7 +24,7 @@ our @EXPORT = qw(&dt &dtstring &dturl &inctxt &ctxt &mkdtskel
                  @dtatributes @dtattributes &pathdt &pathdtstring
                  &father &gfather &ggfather &root);
 
-our $VERSION = '0.50';
+our $VERSION = '0.51';
 
 =head1 NAME
 
@@ -976,7 +976,9 @@ sub tohtml {
   if (not ref($c)) {
     if ($q eq "-pcdata") {
       return $c
-    } else {
+    } elsif ($q eq "br" || $q eq "hr" || $q eq "img") {
+      return _openTag($q,$v)
+	} else {
       return _openTag($q,$v) . "$c</$q>"
     }
   }

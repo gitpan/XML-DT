@@ -1,5 +1,8 @@
 Revision history for Perl extension XML::DT.
 
+0.51  Feb 22, 2008
+	- tohtml function with better handle of specific HTML tags
+
 0.50  Feb 21, 2008
 	- Fixed a problem with HFS+ extended attributes
 

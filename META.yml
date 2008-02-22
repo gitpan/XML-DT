@@ -1,11 +1,11 @@
 --- #YAML:1.0
 name:                XML-DT
-version:             0.50
+version:             0.51
 abstract:            a package for down translation of XML files
 license:             ~
 author:              
     - Jose Joao <jj@di.uminho.pt>
-generated_by:        ExtUtils::MakeMaker version 6.42
+generated_by:        ExtUtils::MakeMaker version 6.43_01
 distribution_type:   module
 requires:     
     ExtUtils::MakeMaker:           6.17
