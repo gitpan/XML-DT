@@ -24,7 +24,7 @@ our @EXPORT = qw(&dt &dtstring &dturl &inctxt &ctxt &mkdtskel
                  @dtatributes @dtattributes &pathdt &pathdtstring
                  &father &gfather &ggfather &root);
 
-our $VERSION = '0.51';
+our $VERSION = '0.52';
 
 =head1 NAME
 
@@ -53,7 +53,7 @@ This module processes XML files with an approach similar to
 OMNIMARK. As XML parser it uses XML::LibXML module in an independent
 way.
 
-Uou can parse HTML files as if they were XML files. For this, you must
+You can parse HTML files as if they were XML files. For this, you must
 supply an extra option to the hash:
 
  %hander = ( -html => 1,
@@ -453,15 +453,17 @@ Jose Joao Almeida, <jj@di.uminho.pt>
 
 Alberto Manuel Simões, <albie@alfarrabio.di.uminho.pt>
 
-thanks to
+=head1 ACKNOWLEDGEMENTS
 
 Michel Rodriguez    <mrodrigu@ieee.org>
+
 José Carlos Ramalho <jcr@di.uminho.pt>
+
 Mark A. Hillebrand
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 1999-2006 by Projecto Natura
+Copyright 1999-2008 by Projecto Natura
 
 This library is free software; you can redistribute it
 and/or modify it under the same terms as Perl itself.
@@ -976,7 +978,7 @@ sub tohtml {
   if (not ref($c)) {
     if ($q eq "-pcdata") {
       return $c
-    } elsif ($q eq "br" || $q eq "hr" || $q eq "img") {
+    } elsif ($q eq "link" || $q eq "br" || $q eq "hr" || $q eq "img") {
       return _openTag($q,$v)
 	} else {
       return _openTag($q,$v) . "$c</$q>"
@@ -1238,7 +1240,7 @@ sub _putele {
 }
 
 sub _whitepc {
-  $_[1] eq '-pcdata' and $_[0] =~ /^[ \t\n]*$/
+  $_[1] eq '-pcdata' and $_[0] =~ /^[ \t\r\n]*$/
 }
 
 sub MMAPON {

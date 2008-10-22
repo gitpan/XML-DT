@@ -1,6 +1,6 @@
 # -*- cperl -*-
 
-use Test::More tests => 26;
+use Test::More tests => 27;
 
 BEGIN {
   use_ok( 'XML::DT' );
@@ -20,6 +20,7 @@ is(toxml("a",{},""), "<a/>");
 is(tohtml("a",{},""), "<a></a>");
 is(tohtml("br",{},""), "<br>");
 is(tohtml("hr",{},""), "<hr>");
+is(tohtml("link",{type=>"bar"},""), "<link type=\"bar\">");
 is(tohtml("img",{src=>"foo"},""), "<img src=\"foo\">");
 
 is(toxml("a",{},"c"), "<a>c</a>");
