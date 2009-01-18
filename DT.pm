@@ -18,13 +18,13 @@ use vars qw($c %v $q @dtcontext %dtcontextcount @dtatributes
 
 our @ISA = qw(Exporter);
 
-our @EXPORT = qw(&dt &dtstring &dturl &inctxt &ctxt &mkdtskel
+our @EXPORT = qw(&dt &dtstring &dturl &inctxt &ctxt &mkdtskel &inpath
                  &mkdtskel_fromDTD &mkdtdskel &tohtml &toxml &MMAPON $c %v $q
                  &xmltree &pathdturl @dtcontext %dtcontextcount
                  @dtatributes @dtattributes &pathdt &pathdtstring
                  &father &gfather &ggfather &root);
 
-our $VERSION = '0.52';
+our $VERSION = '0.53';
 
 =head1 NAME
 
@@ -127,17 +127,23 @@ Like the C<dtstring> function but supporting XPath.
 
 Like the C<dturl> function but supporting XPath.
 
-=head2 inctxt
-
-C<inctxt(pattern)> is true if the actual element path matches the
-provided pattern. This function is meant to be used in the element
-functions in order to achieve context dependent processing.
 
 =head2 ctxt
 
 Returns the context element of the currently being processed
 element. So, if you call C<ctxt(1)> you will get your father element,
 and so on.
+
+=head2 inpath
+
+C<inpath(pattern)> is true if the actual element path matches the
+provided pattern. This function is meant to be used in the element
+functions in order to achieve context dependent processing.
+
+=head2 inctxt
+
+C<inctxt(pattern)> is true if the actual element father matches the
+provided pattern.
 
 =head2 toxml
 
@@ -550,12 +556,17 @@ sub ctxt {
   $dtcontext[-$level-1];
 }
 
+sub inpath {
+  my $pattern = shift ;
+	join ("/", @dtcontext) =~ m!\b$pattern\b!;
+}
+
 
 sub inctxt {
   my $pattern = shift ;
   # see if is in root context...
   return 1 if (($pattern eq "^" && @dtcontext==1) || $pattern eq ".*");
-  join("/",@dtcontext) =~ m!$pattern/[^/]*$! ;
+  join("/", @dtcontext) =~ m!$pattern/[^/]*$! ;
 }
 
 sub father {

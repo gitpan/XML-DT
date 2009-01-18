@@ -15,6 +15,7 @@ WriteMakefile(
 	      'EXE_FILES'    => [ "mkdtskel", "mkdtdskel", "mkxmltype" ],
 	      'PM_FILTER'    => $PM_FILTER,
 	      'PREREQ_PM'    => \%req_modules,
+              'LICENSE'		=> 'perl',
 	      ($] >= 5.005 ?
 	       (ABSTRACT_FROM => 'DT.pm',
 	        AUTHOR        => 'Jose Joao <jj@di.uminho.pt>') : ()

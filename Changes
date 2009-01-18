@@ -1,5 +1,8 @@
 Revision history for Perl extension XML::DT.
 
+0.53  Jan 18, 2009
+	- added 'inpath' function.
+
 0.52  Oct 22, 2008
    - fixed bug on whitepc function.
 
