@@ -1,6 +1,7 @@
 ## -*- cperl -*-
 
 package XML::DT;
+use 5.008006;
 
 use strict;
 
@@ -11,12 +12,10 @@ use XML::DTDParser "ParseDTDFile";
 use XML::LibXML;
 our $PARSER = 'XML::LibXML';
 
-use Exporter ();
+use base 'Exporter';
 
 use vars qw($c %v $q @dtcontext %dtcontextcount @dtatributes
             @dtattributes );
-
-our @ISA = qw(Exporter);
 
 our @EXPORT = qw(&dt &dtstring &dturl &inctxt &ctxt &mkdtskel &inpath
                  &mkdtskel_fromDTD &mkdtdskel &tohtml &toxml &MMAPON $c %v $q
@@ -24,7 +23,7 @@ our @EXPORT = qw(&dt &dtstring &dturl &inctxt &ctxt &mkdtskel &inpath
                  @dtatributes @dtattributes &pathdt &pathdtstring
                  &father &gfather &ggfather &root);
 
-our $VERSION = '0.53';
+our $VERSION = '0.54';
 
 =head1 NAME
 
