@@ -1,7 +1,7 @@
 Changes
 MANIFEST
 Makefile.PL
-DT.pm
+lib/XML/DT.pm
 README
 mkdtskel
 mkdtdskel

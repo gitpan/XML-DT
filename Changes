@@ -1,7 +1,10 @@
 Revision history for Perl extension XML::DT.
 
+0.55  Feb 12, 2011
+        - Process correctly entities (I think)
+
 0.54  Nov 19, 2010
-        - require 2.8.6
+        - require 5.8.6
         - minor changes;        
 
 0.53  Jan 18, 2009

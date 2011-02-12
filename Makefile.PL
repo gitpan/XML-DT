@@ -13,13 +13,13 @@ use ExtUtils::MakeMaker;
 
 WriteMakefile(
 	      'NAME'         => 'XML::DT',
-	      'VERSION_FROM' => 'DT.pm',
+	      'VERSION_FROM' => 'lib/XML/DT.pm',
 	      'EXE_FILES'    => [ "mkdtskel", "mkdtdskel", "mkxmltype" ],
 	      'PM_FILTER'    => $PM_FILTER,
 	      'PREREQ_PM'    => \%req_modules,
               'LICENSE'		=> 'perl',
 	      ($] >= 5.005 ?
-	       (ABSTRACT_FROM => 'DT.pm',
+	       (ABSTRACT_FROM => 'lib/XML/DT.pm',
 	        AUTHOR        => 'Jose Joao <jj@di.uminho.pt>') : ()
 	      ),
 	     );

@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               XML-DT
-version:            0.54
+version:            0.55
 abstract:           a package for down translation of XML files
 author:
     - Jose Joao <jj@di.uminho.pt>
