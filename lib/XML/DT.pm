@@ -23,7 +23,7 @@ our @EXPORT = qw(&dt &dtstring &dturl &inctxt &ctxt &mkdtskel &inpath
                  @dtatributes @dtattributes &pathdt &pathdtstring
                  &father &gfather &ggfather &root);
 
-our $VERSION = '0.55';
+our $VERSION = '0.56';
 
 =head1 NAME
 
@@ -909,7 +909,6 @@ sub _omni{
           shift(@dtattributes);
           pop(@dtcontext); $dtcontextcount{$name}--;
       } elsif (ref($tree) eq "XML::LibXML::Node") {
-          print STDERR "\n\n CALLED \n\n";
           if ($tree->nodeType == XML_ENTITY_REF_NODE) {
               # if we get here, is because we are not expanding entities (I think)
               if ($tree->textContent) {

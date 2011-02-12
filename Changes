@@ -1,5 +1,8 @@
 Revision history for Perl extension XML::DT.
 
+0.56  Feb 12, 2011
+        - Removed debug message :-/
+
 0.55  Feb 12, 2011
         - Process correctly entities (I think)
 
