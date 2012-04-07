@@ -66,3 +66,4 @@ t/06_dtdout.pl
 t/07_case.t
 t/07_case.xml
 t/60_types.t
+META.json                                Module JSON meta-data (added by MakeMaker)

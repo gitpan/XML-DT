@@ -12,7 +12,7 @@ use XML::DTDParser "ParseDTDFile";
 use XML::LibXML ':libxml';
 our $PARSER = 'XML::LibXML';
 
-use base 'Exporter';
+use parent 'Exporter';
 
 use vars qw($c %v $q @dtcontext %dtcontextcount @dtatributes
             @dtattributes );
@@ -23,7 +23,7 @@ our @EXPORT = qw(&dt &dtstring &dturl &inctxt &ctxt &mkdtskel &inpath
                  @dtatributes @dtattributes &pathdt &pathdtstring
                  &father &gfather &ggfather &root);
 
-our $VERSION = '0.56';
+our $VERSION = '0.57';
 
 =head1 NAME
 
@@ -855,13 +855,27 @@ sub _omni{
 
   while(@l) {
       my $tree = shift @l;
-      if (ref($tree) eq "XML::LibXML::CDATASection") {
-          $name = "-pcdata";
-      } else {
-          $name = $tree->getName();
-      }
+      $name = ref($tree) eq "XML::LibXML::CDATASection" ? "-pcdata" : $tree->getName();
 
-      if (ref($tree) eq "XML::LibXML::Comment") {
+      if (ref($tree) eq "XML::LibXML::CDATASection") {
+          $val = $tree->getData();
+
+          $name = "-cdata";
+          $aux = (defined($xml->{-outputenc}))?_fromUTF8($val,$xml->{-outputenc}):$val;
+
+          if (defined($xml->{-cdata})) {
+              push(@dtcontext,"-cdata");
+              $c = $aux;
+              $aux = &{$xml->{-cdata}};
+              pop(@dtcontext);
+          } elsif (defined($xml->{-pcdata})) {
+              push(@dtcontext,"-pcdata");
+              $c = $aux;
+              $aux = &{$xml->{-pcdata}};
+              pop(@dtcontext);
+          }
+
+      } elsif (ref($tree) eq "XML::LibXML::Comment") {
           ### At the moment, treat as Text
           ### We will need to change this, I hope!
           $val = "";
@@ -874,7 +888,7 @@ sub _omni{
               pop(@dtcontext);
           }
       }
-      elsif (ref($tree) eq "XML::LibXML::Text" || ref($tree) eq "XML::LibXML::CDATASection") {
+      elsif (ref($tree) eq "XML::LibXML::Text") {
           $val = $tree->getData();
 
           $name = "-pcdata";
@@ -983,50 +997,50 @@ sub _omniele {
 sub xmltree { +{'-c' => $c, '-q' => $q, %v} }
 
 sub tohtml {
-	my ($q,$v,$c);
+    my ($q,$v,$c);
 	
-	if (not @_) {
-		($q,$v,$c) = ($XML::DT::q, \%XML::DT::v, $XML::DT::c);
-	} elsif (ref($_[0])) {
-		$c = shift;
-	} else {
-		($q,$v,$c) = @_;
-	}
-	
-  if (not ref($c)) {
-    if ($q eq "-pcdata") {
-      return $c
-    } elsif ($q eq "link" || $q eq "br" || $q eq "hr" || $q eq "img") {
-      return _openTag($q,$v)
-	} else {
-      return _openTag($q,$v) . "$c</$q>"
-    }
-  }
-  elsif (ref($c) eq "HASH" && $c->{'-q'} && $c->{'-c'}) {
-    my %a = %$c;
-    my ($q,$c) = delete @a{"-q","-c"};
-    tohtml($q,\%a,(ref($c)?tohtml($c):$c));
-  }
-  elsif (ref($c) eq "HASH") {
-    _openTag($q,$v).
-      join("",map {($_ ne "-pcdata")
-		     ? ( (ref($c->{$_}) eq "ARRAY")
-			 ? "<$_>".
-			 join("</$_>\n<$_>", @{$c->{$_}}).
-			 "</$_>\n" 
-			 : tohtml($_,{},$c->{$_})."\n" )
-		       : () }
-	   keys %{$c} ) .
-	     "$c->{-pcdata}</$q>" } ########  "NOTYetREady"
-  elsif (ref($c) eq "ARRAY") {
-    if (defined($q) && exists($ty{$q}) && $ty{$q} eq "SEQH") {
-      tohtml($q,$v,join("\n",map {tohtml($_)} @$c))
-    } elsif (defined $q) {
-      tohtml($q,$v,join("",@{$c}))
+    if (not @_) {
+        ($q,$v,$c) = ($XML::DT::q, \%XML::DT::v, $XML::DT::c);
+    } elsif (ref($_[0])) {
+        $c = shift;
     } else {
-      join("\n",map {(ref($_)?tohtml($_):$_)} @$c)
+        ($q,$v,$c) = @_;
     }
-  }
+	
+    if (not ref($c)) {
+        if ($q eq "-pcdata") {
+            return $c
+        } elsif ($q eq "link" || $q eq "br" || $q eq "hr" || $q eq "img") {
+            return _openTag($q,$v)
+	} else {
+            return _openTag($q,$v) . "$c</$q>"
+        }
+    }
+    elsif (ref($c) eq "HASH" && $c->{'-q'} && $c->{'-c'}) {
+        my %a = %$c;
+        my ($q,$c) = delete @a{"-q","-c"};
+        tohtml($q,\%a,(ref($c)?tohtml($c):$c));
+    }
+    elsif (ref($c) eq "HASH") {
+        _openTag($q,$v).
+          join("",map {($_ ne "-pcdata")
+                         ? ( (ref($c->{$_}) eq "ARRAY")
+                             ? "<$_>".
+                             join("</$_>\n<$_>", @{$c->{$_}}).
+                             "</$_>\n" 
+                             : tohtml($_,{},$c->{$_})."\n" )
+                           : () }
+               keys %{$c} ) .
+                 "$c->{-pcdata}</$q>" } ########  "NOTYetREady"
+    elsif (ref($c) eq "ARRAY") {
+        if (defined($q) && exists($ty{$q}) && $ty{$q} eq "SEQH") {
+            tohtml($q,$v,join("\n",map {tohtml($_)} @$c))
+        } elsif (defined $q) {
+            tohtml($q,$v,join("",@{$c}))
+        } else {
+            join("\n",map {(ref($_)?tohtml($_):$_)} @$c)
+        }
+    }
 }
 
 sub toxml {

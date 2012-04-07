@@ -1,26 +1,27 @@
---- #YAML:1.0
-name:               XML-DT
-version:            0.56
-abstract:           a package for down translation of XML files
+---
+abstract: 'a package for down translation of XML files'
 author:
-    - Jose Joao <jj@di.uminho.pt>
-license:            perl
-distribution_type:  module
-configure_requires:
-    ExtUtils::MakeMaker:  0
+  - 'Jose Joao <jj@di.uminho.pt>'
 build_requires:
-    ExtUtils::MakeMaker:  0
-requires:
-    ExtUtils::MakeMaker:  6.17
-    LWP::Simple:          1.35
-    Test::More:           0.40
-    XML::DTDParser:       2.00
-    XML::LibXML:          1.54
-no_index:
-    directory:
-        - t
-        - inc
-generated_by:       ExtUtils::MakeMaker version 6.56
+  ExtUtils::MakeMaker: 0
+configure_requires:
+  ExtUtils::MakeMaker: 0
+dynamic_config: 1
+generated_by: 'ExtUtils::MakeMaker version 6.62, CPAN::Meta::Converter version 2.120921'
+license: perl
 meta-spec:
-    url:      http://module-build.sourceforge.net/META-spec-v1.4.html
-    version:  1.4
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: XML-DT
+no_index:
+  directory:
+    - t
+    - inc
+requires:
+  ExtUtils::MakeMaker: 6.17
+  LWP::Simple: 1.35
+  Scalar::Util: 0
+  Test::More: 0.40
+  XML::DTDParser: 2.00
+  XML::LibXML: 1.54
+version: 0.57

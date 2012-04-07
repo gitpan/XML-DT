@@ -1,5 +1,8 @@
 Revision history for Perl extension XML::DT.
 
+0.57  Apr 7, 2012
+        - Let CDATA and PCDATA be processed in a different way.
+
 0.56  Feb 12, 2011
         - Removed debug message :-/
 
