@@ -9,6 +9,7 @@ use ExtUtils::MakeMaker;
 		'LWP::Simple' => '1.35',
 		'XML::DTDParser' => '2.00',
                 'XML::LibXML' => '1.54',
+				'parent' => '0',
                 'Scalar::Util' => '0',
 	       );
 

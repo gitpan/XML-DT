@@ -24,4 +24,5 @@ requires:
   Test::More: 0.40
   XML::DTDParser: 2.00
   XML::LibXML: 1.54
-version: 0.57
+  parent: 0
+version: 0.58

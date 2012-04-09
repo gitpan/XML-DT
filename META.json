@@ -37,10 +37,11 @@
             "Scalar::Util" : "0",
             "Test::More" : "0.40",
             "XML::DTDParser" : "2.00",
-            "XML::LibXML" : "1.54"
+            "XML::LibXML" : "1.54",
+            "parent" : "0"
          }
       }
    },
    "release_status" : "stable",
-   "version" : "0.57"
+   "version" : "0.58"
 }

@@ -23,7 +23,7 @@ our @EXPORT = qw(&dt &dtstring &dturl &inctxt &ctxt &mkdtskel &inpath
                  @dtatributes @dtattributes &pathdt &pathdtstring
                  &father &gfather &ggfather &root);
 
-our $VERSION = '0.57';
+our $VERSION = '0.58';
 
 =head1 NAME
 
