@@ -23,7 +23,9 @@ our @EXPORT = qw(&dt &dtstring &dturl &inctxt &ctxt &mkdtskel &inpath
                  @dtatributes @dtattributes &pathdt &pathdtstring
                  &father &gfather &ggfather &root);
 
-our $VERSION = '0.58';
+our $VERSION = '0.59';
+
+=encoding utf-8
 
 =head1 NAME
 
@@ -456,19 +458,19 @@ http://natura.di.uminho.pt/~jj/perl/XML/
 
 Jose Joao Almeida, <jj@di.uminho.pt>
 
-Alberto Manuel Simıes, <albie@alfarrabio.di.uminho.pt>
+Alberto Manuel Sim√µes, <albie@alfarrabio.di.uminho.pt>
 
 =head1 ACKNOWLEDGEMENTS
 
 Michel Rodriguez    <mrodrigu@ieee.org>
 
-JosÈ Carlos Ramalho <jcr@di.uminho.pt>
+Jos√© Carlos Ramalho <jcr@di.uminho.pt>
 
 Mark A. Hillebrand
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 1999-2008 by Projecto Natura
+Copyright 1999-2012 Project Natura.
 
 This library is free software; you can redistribute it
 and/or modify it under the same terms as Perl itself.

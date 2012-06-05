@@ -5,6 +5,8 @@ mkdtdskel (@ARGV) #simple huh?
 
 __END__
 
+=encoding utf-8
+
 =head1 NAME
 
 mkdtskel - DTD generator using XML::DT
@@ -23,7 +25,7 @@ XML::DT(1), mkdtskel(1) and perl(1)
 
 =head1 AUTHORS
 
-Jose Joao Almeida, <jj@di.uminho.pt>
+Jose João Almeida, <jj@di.uminho.pt>
 
 =head1 COPYRIGHT AND LICENSE
 
