@@ -1,5 +1,8 @@
 Revision history for Perl extension XML::DT.
 
+0.61  Jul 25, 2012
+        - Handle undef elements when parsing wrong formed XML.
+
 0.60  Jul 25, 2012
         - Add -recover option to parse XML (not just HTML).
 

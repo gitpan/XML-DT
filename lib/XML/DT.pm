@@ -23,7 +23,7 @@ our @EXPORT = qw(&dt &dtstring &dturl &inctxt &ctxt &mkdtskel &inpath
                  @dtatributes @dtattributes &pathdt &pathdtstring
                  &father &gfather &ggfather &root);
 
-our $VERSION = '0.60';
+our $VERSION = '0.61';
 
 =encoding utf-8
 
@@ -876,6 +876,8 @@ sub _omni{
 
   while(@l) {
       my $tree = shift @l;
+      next unless $tree;
+
       $name = ref($tree) eq "XML::LibXML::CDATASection" ? "-pcdata" : $tree->getName();
 
       if (ref($tree) eq "XML::LibXML::CDATASection") {
