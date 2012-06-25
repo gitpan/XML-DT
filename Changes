@@ -1,5 +1,9 @@
 Revision history for Perl extension XML::DT.
 
+0.62  Jul 25, 2012
+       - Add the -userdata option.
+       - Document -userdata, -html and -recover.
+
 0.61  Jul 25, 2012
         - Handle undef elements when parsing wrong formed XML.
 

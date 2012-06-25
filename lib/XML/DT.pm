@@ -14,16 +14,16 @@ our $PARSER = 'XML::LibXML';
 
 use parent 'Exporter';
 
-use vars qw($c %v $q @dtcontext %dtcontextcount @dtatributes
+use vars qw($c $u %v $q @dtcontext %dtcontextcount @dtatributes
             @dtattributes );
 
 our @EXPORT = qw(&dt &dtstring &dturl &inctxt &ctxt &mkdtskel &inpath
-                 &mkdtskel_fromDTD &mkdtdskel &tohtml &toxml &MMAPON $c %v $q
+                 &mkdtskel_fromDTD &mkdtdskel &tohtml &toxml &MMAPON $c %v $q $u
                  &xmltree &pathdturl @dtcontext %dtcontextcount
                  @dtatributes @dtattributes &pathdt &pathdtstring
                  &father &gfather &ggfather &root);
 
-our $VERSION = '0.61';
+our $VERSION = '0.62';
 
 =encoding utf-8
 
@@ -38,6 +38,7 @@ XML::DT - a package for down translation of XML files
  %xml=( 'music'    => sub{"Music from: $c\n"},
         'lyrics'   => sub{"Lyrics from: $v{name}\n"},
         'title'    => sub{ uc($c) },
+        '-userdata => { something => 'I like' },
         '-default' => sub{"$q:$c"} );
 
  print dt($filename,%xml);
@@ -294,6 +295,12 @@ C<inctxt> function)
 
 The default C<-pcdata> function is the identity
 
+=head2 C<-cdata> function
+
+You can process C<<CDATA>> in a way different from pcdata. If you
+define a C<-cdata> method, it will be used. Otherwise, the C<-pcdata>
+method is called.
+
 =head2 C<-begin> function
 
 Function to be executed before processing XML file.
@@ -308,6 +315,21 @@ value.
 
 Example of use: post-processing of returned contents
 
+=head2 C<-recover> option
+
+If set, the parser will try to recover in XML errors.
+
+=head2 C<-html> option
+
+If set, the parser will try to recover in errors. Note that this
+differs from the previous one in the sense it uses some knowledge of
+the HTML structure for the recovery.
+
+=head2 C<-userdata> option
+
+Use this to pass any information you like to your handlers. The data
+structure you pass in this option will be available as C<< $u >> in
+your code. -- New in 0.62.
 
 
 =head1 Elements with values other than strings (C<-type>)
@@ -547,10 +569,10 @@ sub dt {
   my $return = "";
   # execute End action if it exists
   if($xml{-end}) {
-    $c = _omni("-ROOT", \%xml, $tree);
-    $return = &{$xml{-end}}
+      $c = _omni("-ROOT", \%xml, $tree);
+      $return = &{$xml{-end}}
   } else {
-    $return = _omni("-ROOT",\%xml, $tree)
+      $return = _omni("-ROOT",\%xml, $tree)
   }
 
   if ($declr) {
@@ -847,14 +869,14 @@ sub _pathtodt {
 
 
 
-sub _omni{
-  my ($par, $xml, @l) = @_;
-  my $defaulttype =
-    (exists($xml->{-type}) && exists($xml->{-type}{-default}))
-      ?
-        $xml->{-type}{-default} : "STR";
-  my $type = $ty{$par} || $defaulttype;
-  my %typeargs = ();
+sub _omni {
+    my ($par, $xml, @l) = @_;
+    my $defaulttype =
+      (exists($xml->{-type}) && exists($xml->{-type}{-default}))
+        ?
+          $xml->{-type}{-default} : "STR";
+    my $type = $ty{$par} || $defaulttype;
+    my %typeargs = ();
 
   if (ref($type) eq "mmapon") {
       $typeargs{$_} = 1  for (@$type);
@@ -874,6 +896,7 @@ sub _omni{
 
   my ($name, $val, @val, $atr, $aux);
 
+    $u = $xml->{-userdata};
   while(@l) {
       my $tree = shift @l;
       next unless $tree;

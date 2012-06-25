@@ -25,4 +25,4 @@ requires:
   XML::DTDParser: 2.00
   XML::LibXML: 1.54
   parent: 0
-version: 0.61
+version: 0.62
