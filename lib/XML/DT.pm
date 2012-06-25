@@ -23,7 +23,7 @@ our @EXPORT = qw(&dt &dtstring &dturl &inctxt &ctxt &mkdtskel &inpath
                  @dtatributes @dtattributes &pathdt &pathdtstring
                  &father &gfather &ggfather &root);
 
-our $VERSION = '0.59';
+our $VERSION = '0.60';
 
 =encoding utf-8
 
@@ -61,6 +61,11 @@ supply an extra option to the hash:
              ...
            );
 
+You can also ask the parser to recover from XML errors:
+
+ %hander = ( -recover => 1,
+             ...
+           );
 
 =head1 Functions
 
@@ -516,14 +521,20 @@ sub dt {
 
   # parse the file
   my $doc;
-  if ( $xml{'-html'}) {
+  if ( $xml{'-recover'}) {
       $parser->recover(1);
-      # $parser->recover_silently(1);
+      eval {
+          local $SIG{__WARN__} = sub{};
+          $doc = $parser->parse_file($file);
+      };
+      return undef if !$doc;
+  }
+  elsif ( $xml{'-html'}) {
+      $parser->recover(1);
       eval {
           local $SIG{__WARN__} = sub{};
           $doc = $parser->parse_html_file($file);
       };
-      #    if ($@) {warn("Erro: $@\n"); } #{return undef; }
       return undef if !$doc;
   }
   else {
@@ -659,7 +670,15 @@ sub dtstring {
 
   # parse the string
   my $doc;
-  if ( $xml{'-html'}) {
+  if ( $xml{'-recover'}) {
+      $parser->recover(1);
+      eval {
+          local $SIG{__WARN__} = sub{};
+          $doc = $parser->parse_string($string);
+      };
+      return undef if !$doc;
+  }
+  elsif ( $xml{'-html'}) {
       $parser->recover(1);
       eval{
           local $SIG{__WARN__} = sub{};

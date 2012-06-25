@@ -1,5 +1,8 @@
 Revision history for Perl extension XML::DT.
 
+0.60  Jul 25, 2012
+        - Add -recover option to parse XML (not just HTML).
+
 0.59  Jun 5, 2012
         - Fix POD encodings.
 
