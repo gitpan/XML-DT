@@ -1,5 +1,7 @@
 #!/usr/bin/perl
-use XML::DT ;
+use XML::DT;
+use warnings;
+use strict;
 my $filename = shift;
 
 # Variable Reference
@@ -8,11 +10,11 @@ my $filename = shift;
 # $q - element name (tag)
 # %v - hash of attributes
 
-%handler=(
+my %handler=(
 #    '-outputenc' => 'ISO-8859-1',
 #    '-default'   => sub{"<$q>$c</$q>"},
      'a' => sub{ }, # 1 occurrences;
      'b' => sub{ }, # 3 occurrences; attributes: title
      'c' => sub{ }, # 6 occurrences; attributes: title
 );
-print dt($filename,%handler);
+print dt($filename, %handler);

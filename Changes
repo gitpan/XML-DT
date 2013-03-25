@@ -1,5 +1,8 @@
 Revision history for Perl extension XML::DT.
 
+0.63  Mar 25, 2013
+       - mkdtskel now uses strict/warnings
+
 0.62  Jul 25, 2012
        - Add the -userdata option.
        - Document -userdata, -html and -recover.

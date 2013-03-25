@@ -23,7 +23,7 @@ our @EXPORT = qw(&dt &dtstring &dturl &inctxt &ctxt &mkdtskel &inpath
                  @dtatributes @dtattributes &pathdt &pathdtstring
                  &father &gfather &ggfather &root);
 
-our $VERSION = '0.62';
+our $VERSION = '0.63';
 
 =encoding utf-8
 
@@ -99,7 +99,7 @@ of XPath on handler keys. Example:
    "//image[@type='bmp']" => sub{ "BMP: sorry, no bitmaps on the web" },
  )
 
- pathdt($filename,%handler);
+ pathdt($filename, %handler);
 
 Here are some examples of valid XPath expressions under XML::DT:
 
@@ -1154,7 +1154,9 @@ sub mkdtskel_fromDTD {
 
   print <<'PERL';
 #!/usr/bin/perl
-use XML::DT ;
+use warnings;
+use strict;
+use XML::DT;
 my $filename = shift;
 
 # Variable Reference
@@ -1163,7 +1165,7 @@ my $filename = shift;
 # $q - element name (tag)
 # %v - hash of attributes
 
-%handler=(
+my %handler=(
 #    '-outputenc' => 'ISO-8859-1',
 #    '-default'   => sub{"<$q>$c</$q>"},
 PERL
@@ -1180,7 +1182,7 @@ PERL
   print <<'PERL';
 );
 
-print dt($filename,%handler);
+print dt($filename, %handler);
 PERL
 
 }
@@ -1202,7 +1204,9 @@ sub mkdtskel{
      '-end' => sub{
        print <<'END';
 #!/usr/bin/perl
-use XML::DT ;
+use XML::DT;
+use warnings;
+use strict;
 my $filename = shift;
 
 # Variable Reference
@@ -1211,7 +1215,7 @@ my $filename = shift;
 # $q - element name (tag)
 # %v - hash of attributes
 
-%handler=(
+my %handler=(
 #    '-outputenc' => 'ISO-8859-1',
 #    '-default'   => sub{"<$q>$c</$q>"},
 END
@@ -1226,7 +1230,7 @@ END
        }
        print <<'END';
 );
-print dt($filename,%handler);
+print dt($filename, %handler);
 END
      }
     );

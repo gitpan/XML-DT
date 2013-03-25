@@ -6,20 +6,26 @@ our ($dtd, $html, $lines);
 
 my $filename = shift;
 
-$dtd = 1 if ($filename =~ m!\.dtd$!);
+$dtd = 1 if $filename =~ m!\.dtd$!;
 
 
 if ($dtd) {
   mkdtskel_fromDTD ($filename, @ARGV);
+}
+else {
+    if ($lines) {
+        ## XXX - fixme, using head/xmllint is not a good idea
+        system("head -$lines $filename | xmllint --recover - > /tmp/_xml_$$");
+        $filename = "/tmp/_xml_$$";
+    }
 
-} else{ 
-   if($lines){
-      system("head -$lines $filename | xmllint --recover - > /tmp/_xml_$$");
-      $filename = "/tmp/_xml_$$";
-   }
-   if ($html) { mkdtskel ("-html", $filename, @ARGV); } 
-   else       { mkdtskel (         $filename, @ARGV); }
-   unlink("/tmp/_xml_$$") if $lines;
+    if ($html) {
+        mkdtskel("-html", $filename, @ARGV);
+    }
+    else {
+        mkdtskel($filename, @ARGV);
+    }
+    unlink("/tmp/_xml_$$") if $lines;
 }
 
 __END__
@@ -57,7 +63,7 @@ Alberto Manuel Simões, <albie@alfarrabio.di.uminho.pt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 1999-2004 by Projecto Natura
+Copyright 1999-2013 by Projecto Natura
 
 This library is free software; you can redistribute it
 and/or modify it under the same terms as Perl itself.
