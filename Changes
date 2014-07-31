@@ -1,5 +1,9 @@
 Revision history for Perl extension XML::DT.
 
+0.64  Jul 31, 2014
+       - fix the way temporary files are created.
+         Thanks to Damyan Ivanov (Debian community)
+
 0.63  Mar 25, 2013
        - mkdtskel now uses strict/warnings
 

@@ -1,6 +1,7 @@
 #!/usr/bin/perl -s
 use XML::DT;
 use XML::DTDParser "ParseDTDFile";
+use File::Temp;
 
 our ($dtd, $html, $lines);
 
@@ -15,8 +16,8 @@ if ($dtd) {
 else {
     if ($lines) {
         ## XXX - fixme, using head/xmllint is not a good idea
-        system("head -$lines $filename | xmllint --recover - > /tmp/_xml_$$");
-        $filename = "/tmp/_xml_$$";
+        $filename = File::Temp->new( UNLINK => 0 )->filename;
+        system("head -$lines $filename | xmllint --recover - > $filename");
     }
 
     if ($html) {
@@ -25,7 +26,7 @@ else {
     else {
         mkdtskel($filename, @ARGV);
     }
-    unlink("/tmp/_xml_$$") if $lines;
+    unlink($filename) if $lines;
 }
 
 __END__

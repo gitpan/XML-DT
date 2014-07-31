@@ -1,6 +1,7 @@
 #!/usr/bin/perl -w -s
 use XML::DT;
 use Data::Dumper;
+use File::Temp;
 use Term::ReadLine;
 #use locale;
 
@@ -50,11 +51,11 @@ sub mkxmltypes {
 
   for my $fname (@files){
     if($lines){
-      system("head -$lines $fname | xmllint --recover - > /tmp/_xml_$$");
-      $fname = "/tmp/_xml_$$";
+      $fname = File::Temp->new( UNLINK => 0 )->filename;
+      system("head -$lines $fname | xmllint --recover - > $fname");
     }
     dt($fname,%handler); 
-    unlink("/tmp/_xml_$$") if $lines;
+    unlink($fname) if $lines;
   }
 
   print "# ", join(" ",keys %root)," ...",  scalar(localtime(time)) ,"\n";
