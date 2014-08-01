@@ -1,5 +1,9 @@
 Revision history for Perl extension XML::DT.
 
+0.65  Aug 1, 2014
+       - fix the fix
+         Thanks to Olly Betts (Debian community)
+
 0.64  Jul 31, 2014
        - fix the way temporary files are created.
          Thanks to Damyan Ivanov (Debian community)

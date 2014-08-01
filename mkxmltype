@@ -51,8 +51,9 @@ sub mkxmltypes {
 
   for my $fname (@files){
     if($lines){
-      $fname = File::Temp->new( UNLINK => 0 )->filename;
+      my $tmpfile = File::Temp->new( UNLINK => 0 )->filename;
       system("head -$lines $fname | xmllint --recover - > $fname");
+      $fname = $tmpfile;
     }
     dt($fname,%handler); 
     unlink($fname) if $lines;

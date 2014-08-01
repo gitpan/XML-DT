@@ -16,8 +16,9 @@ if ($dtd) {
 else {
     if ($lines) {
         ## XXX - fixme, using head/xmllint is not a good idea
-        $filename = File::Temp->new( UNLINK => 0 )->filename;
-        system("head -$lines $filename | xmllint --recover - > $filename");
+        my $tmpfile = File::Temp->new( UNLINK => 0 )->filename;
+        system("head -$lines $filename | xmllint --recover - > $tmpfile");
+        $filename = $tmpfile;
     }
 
     if ($html) {
