@@ -52,7 +52,7 @@ sub mkxmltypes {
   for my $fname (@files){
     if($lines){
       my $tmpfile = File::Temp->new( UNLINK => 0 )->filename;
-      system("head -$lines $fname | xmllint --recover - > $fname");
+      system("head -$lines $fname | xmllint --recover - > $tmpfile");
       $fname = $tmpfile;
     }
     dt($fname,%handler); 
